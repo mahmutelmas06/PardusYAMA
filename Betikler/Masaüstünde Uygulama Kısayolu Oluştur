@@ -1,0 +1,67 @@
+#!/bin/sh
+# Make lancher - Script to create a .desktop launcher at your Gnome desktop
+# Yapımcı Terje Tollefsen
+# Geliştiren Mahmut Elmas
+
+
+
+makelancher() {
+        lname=`gdialog --inputbox "Kısayol adı girin" 200 100 "$arg" 2>&1`
+        
+        if [ $? -eq 1 ]; then
+                exit
+        fi
+
+        lcomment=`gdialog --inputbox "Açıklama yazın" 200 100 "$arg" 2>&1`
+
+        if [ $? -eq 1 ]; then
+                exit
+        fi
+
+	
+        licon=`zenity --title="Uygulama simgesi seçin" --file-selection --filename "/usr/share/icons/hicolor/32x32/apps/"`
+	if [ "$licon" = "" ]; then
+	licon="$1"
+	fi
+
+ 
+	  if [ $? -eq 1 ]; then
+                exit
+          fi
+        
+        echo [Desktop Entry] > ~/Masaüstü/"$arg.desktop"
+        echo Name=$lname >> ~/Masaüstü/"$arg.desktop"
+        echo Comment=$lcomment >> ~/Masaüstü/"$arg.desktop"
+		echo Icon=$licon >> ~/Masaüstü/"$arg.desktop"
+        echo Exec=$PWD/$lexec >> ~/Masaüstü/"$arg.desktop"
+        echo Terminal=false >> ~/Masaüstü/"$arg.desktop"
+        echo Type=Application >> ~/Masaüstü/"$arg.desktop"
+        
+        chmod -R 777 ~/Masaüstü/"$arg.desktop"
+		chown -R $USER:$USER ~/Masaüstü/"$arg.desktop"
+		chmod  u+x ~/Masaüstü/"$arg.desktop"
+}
+
+for arg
+do
+
+        lexec=$arg
+
+        if [ -f ~/Masaüstü/"$arg.desktop" ]; 
+        then
+                if gdialog --title "Üstüne yazılsın mı?" --defaultno --yesno "$arg zaten mevcut. Değiştirilsin mi ?" 200 100
+                then            
+                        makelancher
+                else
+                        arg=`gdialog --inputbox ".desktop filename for $arg" 200 100 "New-$arg" 2>&1`
+                        
+                        if [ $? -eq 1 ]; then
+                                exit
+                        fi
+        
+                        makelancher
+                fi
+        else
+                makelancher
+        fi
+done

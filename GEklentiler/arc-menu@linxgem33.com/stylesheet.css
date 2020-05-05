@@ -1,0 +1,200 @@
+/*
+ * Arc Menu - A traditional application menu for GNOME 3
+ *
+ * Arc Menu Lead Developer
+ * Andrew Zaech https://gitlab.com/AndrewZaech
+ * 
+ * Arc Menu Founder/Maintainer/Graphic Designer
+ * LinxGem33 https://gitlab.com/LinxGem33
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+ 
+#arc-search{width: 290px;} 
+.arc-menu-status-text{
+color:rgba(211, 218, 227, 1);
+font-size:9pt;
+}
+ .search-statustext {font-size:11pt;}
+ .left-scroll-area{ 
+width:290px;
+}
+.arc-empty-dash-drop-target{
+width: 290px; 
+height: 2px; 
+background-color:rgb(63,62,64); 
+padding: 0 0; 
+margin:0;
+}
+.left-box{
+width:290px;
+}
+.vert-sep{
+width:11px;
+}
+#search-entry{
+max-width: 17.667em;
+}
+#search-entry:focus { 
+border-color:rgb(63,62,64);
+}
+#arc-search-entry{
+max-width: 17.667em;
+font-size:9pt;
+ border-color:rgb(63,62,64);
+ color:rgba(211, 218, 227, 1);
+ background-color:rgba(28, 28, 28, 0.98);
+}
+#arc-search-entry:focus { 
+border-color:rgba(127,126,128,1);
+}
+.arc-menu-icon{
+color: rgb(240,240,240);
+}
+
+.arc-menu-icon:hover,
+.arc-menu-icon:active{
+color: rgb(214,214,214);
+}
+.arc-menu-action{
+color:rgba(211, 218, 227, 1);
+}
+.arc-menu-action:hover, .arc-menu-action:focus {
+color:rgba(255,255,255,1);
+ background-color:rgba(238, 238, 236, 0.1);
+}
+#tooltip-menu-item{
+ padding: 2px 5px;
+max-width:550px;
+ min-height: 0px;
+}.arc-menu{
+-boxpointer-gap: 0px;
+min-width: 15em;
+color: #D3DAE3;
+border-image: none;
+box-shadow: none;
+font-size:9pt;
+}
+.arc-menu .popup-sub-menu {
+padding-bottom: 1px;
+background-color: rgba(41,41,41,0.98);
+border-color: rgba(54,54,54,0.98);
+ border-width:1px;
+}
+.arc-menu .popup-menu-content {padding: 1em 0em;}
+ .arc-menu .popup-menu-item {
+spacing: 12px; 
+border: 0;
+color:rgba(211, 218, 227, 1);
+ }
+.arc-menu .popup-menu-item:ltr {padding: .4em 1.75em .4em 0em; }
+.arc-menu .popup-menu-item:rtl {padding: .4em 0em .4em 1.75em;}
+.arc-menu .popup-menu-item:checked {
+background-color:rgba(28, 28, 28, 0.98);
+ box-shadow: 0;
+font-weight: bold;
+ }
+.arc-menu .popup-menu-item.selected, .arc-menu .popup-menu-item:active{
+background-color:rgba(238, 238, 236, 0.1); 
+color: rgba(255,255,255,1);
+ }
+.arc-menu .popup-menu-item:disabled {color: rgba(238, 238, 236, 0.5); }
+.arc-menu-boxpointer{ 
+-arrow-border-radius:0px;
+-arrow-background-color:rgba(28, 28, 28, 0.98);
+-arrow-border-color:rgb(63,62,64);
+-arrow-border-width:0px;
+-arrow-base:0px;
+-arrow-rise:0px;
+-arrow-box-shadow: 0 1px 3px black;
+ }
+.arc-menu .popup-menu-content
+ {
+margin: 0;
+background-color: transparent;
+border-radius: 0px;
+box-shadow: 0;
+}
+
+.arc-menu-sep {
+height: 1px;
+margin: 5px 20px;
+background-color: transparent;
+border-color:rgb(63,62,64);
+ border-bottom-width: 1px;
+border-bottom-style: solid;
+ }.menu-user-avatar {
+ background-size: contain; 
+ border: none;
+ border-radius: 999px;
+ }#rightClickMenu{max-width:350px;}.arc-right-click{
+max-width:350px;
+min-width: 15em;
+color: #D3DAE3;
+border-image: none;
+font-size:9pt;
+margin:2px;
+padding:2px;
+spacing:2px;
+box-shadow: 1px 1px 4px rgb(53, 52, 52);
+}
+.arc-right-click .popup-sub-menu {
+padding-bottom: 1px;
+background-color: #3a393b;
+box-shadow: inset 0 -1px 0px #323233;
+ }
+.arc-right-click .popup-menu-content {padding: 2px;}
+ .arc-right-click .popup-menu-item {
+spacing: 12px; 
+border: 0;
+color:rgba(211, 218, 227, 1);
+ }
+.arc-right-click .popup-menu-item:ltr {padding: .4em 1.75em .4em 0em; }
+.arc-right-click .popup-menu-item:rtl {padding: .4em 0em .4em 1.75em;}
+.arc-right-click .popup-menu-item:checked {
+background-color: #3a393b;
+ box-shadow: inset 0 1px 0px #323233;
+font-weight: bold;
+ }
+.arc-right-click .popup-menu-item.selected, .arc-right-click .popup-menu-item:active{
+background-color:rgba(238, 238, 236, 0.1); 
+color: rgba(255,255,255,1);
+ }
+.arc-right-click .popup-menu-item:disabled {color: rgba(238, 238, 236, 0.5); }
+.arc-right-click .popup-menu-item:insensitive {color:rgba(135,142,151,1); }
+.arc-right-click-boxpointer{ 
+-arrow-border-radius:0px;
+-arrow-background-color:rgba(41,41,41,0.98);
+-arrow-border-color:rgb(63,62,64);
+-arrow-border-width:1px;
+-arrow-base:0px;
+-arrow-rise:0px;
+-arrow-box-shadow: 0 1px 3px black;
+ }
+.arc-right-click .popup-menu-content
+ {
+margin: 0;
+background-color: transparent;
+border-radius: 0px;
+box-shadow: 0;
+}
+
+.app-right-click-sep {
+height: 1px;
+margin: 2px 35px;
+background-color: transparent;
+border-color:rgba(76,75,77,1);
+border-bottom-width: 1px;
+border-bottom-style: solid; 
+}

@@ -1,0 +1,190 @@
+<?xml version="1.0"?>
+
+<interface domain="applications-overview-tooltip">
+
+<object class="GtkAdjustment" id="Adjust_1">
+	<property name="lower">0</property>
+	<property name="upper">1500</property>
+	<property name="step_increment">5</property>
+</object>
+<object class="GtkAdjustment" id="Adjust_2">
+	<property name="lower">0</property>
+	<property name="upper">150</property>
+	<property name="step_increment">5</property>
+</object>
+<object class="GtkAdjustment" id="Adjust_3">
+	<property name="lower">0</property>
+	<property name="upper">150</property>
+	<property name="step_increment">5</property>
+</object>
+
+<object class="GtkVBox" id="vbox_built">
+	<property name="margin">10</property>
+	<property name="spacing">5</property>
+
+	<child>
+		<object class="GtkLabel">
+			<property name="label" translatable="yes">&lt;b&gt;Timings&lt;/b&gt;</property>
+			<property name="use_markup">true</property>
+			<property name="hexpand">true</property>
+			<property name="halign">1</property>
+		</object>
+	</child>
+
+	<child>
+		<object class="GtkBox">
+			<property name="spacing">5</property>
+			<child>
+				<object class="GtkLabel">
+					<property name="label" translatable="yes">Hover time before the tooltip is displayed (in ms)</property>
+					<property name="hexpand">true</property>
+					<property name="halign">1</property>
+				</object>
+			</child>
+			<child>
+				<object class="GtkSpinButton" id="field_hoverdelay">
+					<property name="adjustment">Adjust_1</property>
+				</object>
+			</child>
+		</object>
+	</child>
+
+	<child>
+		<object class="GtkBox">
+			<property name="spacing">5</property>
+			<child>
+				<object class="GtkLabel">
+					<property name="label" translatable="yes">Tooltip display animation duration (in ms)</property>
+					<property name="hexpand">true</property>
+					<property name="halign">1</property>
+				</object>
+			</child>
+			<child>
+				<object class="GtkSpinButton" id="field_labelshowtime">
+					<property name="adjustment">Adjust_2</property>
+				</object>
+			</child>
+		</object>
+	</child>
+
+	<child>
+		<object class="GtkBox">
+			<property name="spacing">5</property>
+			<child>
+				<object class="GtkLabel">
+					<property name="label" translatable="yes">Tooltip dismiss animation duration (in ms)</property>
+					<property name="hexpand">true</property>
+					<property name="halign">1</property>
+				</object>
+			</child>
+			<child>
+				<object class="GtkSpinButton" id="field_labelhidetime">
+					<property name="adjustment">Adjust_3</property>
+				</object>
+			</child>
+		</object>
+	</child>
+
+	<child>
+		<object class="GtkSeparator">
+		</object>
+	</child>
+
+	<child>
+		<object class="GtkLabel">
+			<property name="label" translatable="yes">&lt;b&gt;When to show Tooltip&lt;/b&gt;</property>
+			<property name="use_markup">true</property>
+			<property name="hexpand">true</property>
+			<property name="halign">1</property>
+		</object>
+	</child>
+
+	<child>
+		<object class="GtkBox">
+			<property name="spacing">5</property>
+			<child>
+				<object class="GtkLabel">
+					<property name="label" translatable="yes">Show tooltips even if the icon-label is not elipsized</property>
+					<property name="hexpand">true</property>
+					<property name="halign">1</property>
+				</object>
+			</child>
+			<child>
+				<object class="GtkSwitch" id="field_alwaysshow">
+					<property name="active">true</property>
+				</object>
+			</child>
+		</object>
+	</child>
+
+	<child>
+		<object class="GtkSeparator">
+		</object>
+	</child>
+
+	<child>
+		<object class="GtkLabel">
+			<property name="label" translatable="yes">&lt;b&gt;Tooltip appearance&lt;/b&gt;</property>
+			<property name="use_markup">true</property>
+			<property name="hexpand">true</property>
+			<property name="halign">1</property>
+		</object>
+	</child>
+
+	<child>
+		<object class="GtkBox">
+			<property name="spacing">5</property>
+			<child>
+				<object class="GtkLabel">
+					<property name="label" translatable="yes">Draw borders</property>
+					<property name="hexpand">true</property>
+					<property name="halign">1</property>
+				</object>
+			</child>
+			<child>
+				<object class="GtkSwitch" id="field_borders">
+					<property name="active">false</property>
+				</object>
+			</child>
+		</object>
+	</child>
+
+	<child>
+		<object class="GtkBox">
+			<property name="spacing">5</property>
+			<child>
+				<object class="GtkLabel">
+					<property name="label" translatable="yes">Display app description in the tooltip</property>
+					<property name="hexpand">true</property>
+					<property name="halign">1</property>
+				</object>
+			</child>
+			<child>
+				<object class="GtkSwitch" id="field_appdescription">
+					<property name="active">true</property>
+				</object>
+			</child>
+		</object>
+	</child>
+
+	<child>
+		<object class="GtkBox">
+			<property name="spacing">5</property>
+			<child>
+				<object class="GtkLabel">
+					<property name="label" translatable="yes">Show applications count on groups</property>
+					<property name="hexpand">true</property>
+					<property name="halign">1</property>
+				</object>
+			</child>
+			<child>
+				<object class="GtkSwitch" id="field_groupappcount">
+					<property name="active">true</property>
+				</object>
+			</child>
+		</object>
+	</child>
+
+</object>
+
+</interface>

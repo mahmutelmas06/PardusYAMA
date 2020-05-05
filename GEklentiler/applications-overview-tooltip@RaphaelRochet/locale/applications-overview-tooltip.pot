@@ -1,0 +1,66 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-05-09 00:19+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: extension.js:183
+#, javascript-format
+msgid "Group of %d application"
+msgid_plural "Group of %d applications"
+msgstr[0] ""
+msgstr[1] ""
+
+#: prefs.xml:27
+msgid "<b>Timings</b>"
+msgstr ""
+
+#: prefs.xml:39
+msgid "Hover time before the tooltip is displayed (in ms)"
+msgstr ""
+
+#: prefs.xml:57
+msgid "Tooltip display animation duration (in ms)"
+msgstr ""
+
+#: prefs.xml:75
+msgid "Tooltip dismiss animation duration (in ms)"
+msgstr ""
+
+#: prefs.xml:95
+msgid "<b>When to show Tooltip</b>"
+msgstr ""
+
+#: prefs.xml:107
+msgid "Show tooltips even if the icon-label is not elipsized"
+msgstr ""
+
+#: prefs.xml:127
+msgid "<b>Tooltip appearance</b>"
+msgstr ""
+
+#: prefs.xml:139
+msgid "Draw borders"
+msgstr ""
+
+#: prefs.xml:157
+msgid "Display app description in the tooltip"
+msgstr ""
+
+#: prefs.xml:175
+msgid "Show applications count on groups"
+msgstr ""

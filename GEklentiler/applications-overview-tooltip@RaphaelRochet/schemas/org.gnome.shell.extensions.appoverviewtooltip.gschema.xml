@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="gnome-shell-extensions">
+  <schema id="org.gnome.shell.extensions.applications-overview-tooltip"
+      path="/org/gnome/shell/extensions/applications-overview-tooltip/">
+
+    <key type="i" name="hoverdelay">
+        <default>300</default>
+        <summary>Set timeout before tooltip shows.</summary>
+        <description>How long the mouse-cursor have to stay over the icon before the tooltip is displayed (in ms).</description>
+    </key>
+    <key type="i" name="labelshowtime">
+        <default>15</default>
+        <summary>Set fade-in tooltip duration.</summary>
+        <description>Determines how fast the tooltip should be displayed.</description>
+    </key>
+     <key type="i" name="labelhidetime">
+        <default>10</default>
+        <summary>Set fade-out tooltip duration.</summary>
+        <description>Determines how fast the tooltip should be dismissed.</description>
+    </key>
+    <key name="alwaysshow" type="b">
+            <default>true</default>
+            <summary>Always show tooltips.</summary>
+            <description>Shall the tooltip be displayed even if the text is not cut-off/elipsized.</description>
+    </key>
+    <key name="appdescription" type="b">
+      <default>true</default>
+      <summary>Display also app description.</summary>
+      <description>Shall the description of the app be displayed under the name (true/false)</description>
+    </key>
+    <key name="groupappcount" type="b">
+      <default>true</default>
+      <summary>Display groups app count.</summary>
+      <description>Shall the count of the group's applications be displayed on the tooltip (true/false)</description>
+    </key>
+    <key name="borders" type="b">
+      <default>false</default>
+      <summary>Display a border.</summary>
+      <description>(true/false)</description>
+    </key>
+  </schema>
+</schemalist>
