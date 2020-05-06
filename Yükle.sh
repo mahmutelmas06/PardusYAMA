@@ -29,7 +29,7 @@
 ROOT_UID=0	                        # Root Kimliği
 MAX_DELAY=20                        # Şifre girmek için beklenecek süre
 
-command -v gnome-shell >/dev/null 2>&1 || { zenity --error --text="Sisteminiz Gnome Shell değildir."; exit 1; } # Gnome Shell mi kontrol et.
+command -v gnome-shell >/dev/null 2>&1 || { zenity --error --text="Sisteminiz Gnome Shell değildir."; exit 1; } # Gnome Shell mi kontrol et. Değilse çıkış yap.
 
 if [ "$UID" -eq "$ROOT_UID" ]; then # Root yetkisi var mı diye kontrol et.
 
@@ -57,33 +57,33 @@ fi
 
 IFS=":" ; for word in $action ; do   #  Zenity checklist için çoklu seçim komutu başlat
 
-case $word in "Bazı"*)
+case $word in "Bazı"*)              # Bazı uygulamaların kaldırılması ============================================
 
-apt remove gdebi
+apt remove gdebi 					# Pardus Paket Yükleyici adı altında bir Gdebi kopyası zaten yüklü
 
 ;;
 
-"Sık"*)  # Bazı uygulamaların yüklenmesi ve kaldırılması # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+"Sık"*)  # Bazı uygulamaların yüklenmesi =========================================================
+
+dpkg -i -R /Yazılım/*.deb
+apt-get -fy install
 
 apt-get install chrome-gnome-shell	# Gnome eklentileri tarayıcı eklentisini yükle
 
 dpkg --add-architecture i386        # İ386 desteğini etkinleştir
 
-apt install nautilus-admin          # Yönetici olarak aç ve düzenle düğmesi
+apt install grub-customizer         # Grub giriş ekranını özelleştir
 
-apt install grub-customizer
+apt install python3-pip             # Pip komutunu kullanabilmek için gerekli kütüphane
 
-apt remove gdebi 					# Pardus Paket Yükleyici adı altında bir Gdebi kopyası zaten yüklü
-
-sudo apt install python3-pip        # Pip komutunu kullanabilmek için gerekli kütüphane
-
-apt install flatpak                 # Flatpak desteğini etkinleştir
-flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-flatpak remote-add --if-not-exists winepak https://dl.winepak.org/repo/winepak.flatpakrepo
+apt install flatpak                                                                         # ------------------------------
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo     # Flatpak desteğini etkinleştir
+flatpak remote-add --if-not-exists winepak https://dl.winepak.org/repo/winepak.flatpakrepo  # ------------------------------
 
 apt install ffmpeg					# Video indirme ve düzenleme programları için gerekli uygulamayı yükle
 
-apt install timeshift				# Sistem Geri Yükleme yazılımını yükle
+
+
 
 git_check ()
 {
@@ -111,7 +111,7 @@ _USERS="$(awk -F':' '{ if ( $3 >= 500 && $3 <=1000 ) print $1 }' /etc/passwd)" #
 
 ;;
 
-"Sağ"*)  # Şablonları Yükle # # # # # # # # # # # # # # # # # # # # #  # # # # 
+"Sağ"*)  # Şablonları Yükle =========================================================
 
 
 for u in $_USERS
@@ -159,7 +159,7 @@ done
 
 ;;
 
-"Betikler"*)  # Betikleri Yükle # # # # # # # # # # # # # # # # # # # # #  # # # # 
+"Betikler"*)  # Betikleri Yükle =========================================================
 
 
 for u in $_USERS
@@ -191,7 +191,7 @@ done
 
 ;;
 
-"Gnome"*)  # GNOME EKLENTİLERİNİ Yükle # # # # # # # # # # # # # # # # # # # # #  # # # # 
+"Gnome"*)  # GNOME EKLENTİLERİNİ Yükle =========================================================
 
 
 for u in $_USERS
@@ -223,7 +223,7 @@ done
 done
 
 
-# Gnome Ayarları  # # # # # # # # # # # # # # # # # # # # # # #  # # # # # # # # # # # # # # # # # # # # # # # 
+# Gnome Ayarları  # # # # # # # # # # # # # # # # # # # # # # #  # # # #
 
 dconf write /org/gnome/nautilus/preferences/executable-text-activation "'ask'"
 
@@ -312,19 +312,19 @@ rm -f -r /usr/local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
 gnome-shell --replace &
 
 ;;
-"Ücretsiz"*)  #  Temel Microsoft ücretsiz fontları yükleme # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+"Ücretsiz"*)  #  Temel Microsoft ücretsiz fontları yükleme =========================================================
 
 
 	# /usr/share/fonts/truetype/msttcorefonts kasörü var mı kontrol et
 	if [ ! -d /usr/share/fonts/truetype/msttcorefonts ];
 	then
 		mkdir /usr/share/fonts/truetype/msttcorefonts
-		cp -r WindowsFontları/* /usr/share/fonts/truetype/msttcorefonts
+		cp -r Fontlar/* /usr/share/fonts/truetype/msttcorefonts
 		echo -e "\nFontlar yüklendi.."
 	else
 		# varsa yeni klasör oluşturmayı atla
-		cp -r WindowsFontları/* /usr/share/fonts/truetype/msttcorefonts
-		echo "\nWindows Fontları yüklendi."
+		cp -r Fontlar/* /usr/share/fonts/truetype/msttcorefonts
+		echo "\nÜcretsiz Windows Fontları yüklendi."
 	fi
 
 	find /usr/share/fonts/truetype/msttcorefonts -type f -exec chmod 775 {} \+
@@ -332,7 +332,7 @@ gnome-shell --replace &
 
 ;;
 
-"Görsel"*)  # Grub2 Tema Yükleme  # # # # # # # # # # # # # # # # # # # # # # #  # # # # # # # # # # # # # # # # # # # # # # # 
+"Görsel"*)  # Grub2 Tema Yükleme  =========================================================
 
 
 THEME_DIR="/usr/share/grub/themes"
@@ -346,7 +346,7 @@ GFXBT=4096x2160,1920x1080,1366x768,1024x768,auto
 
   # Copy theme
 
-  cp -a ${THEME_NAME}/* ${THEME_DIR}/${THEME_NAME}
+  cp -a /Grub/${THEME_NAME}/* ${THEME_DIR}/${THEME_NAME}
 
   # Set theme
 
