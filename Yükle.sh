@@ -65,7 +65,7 @@ apt remove gdebi 					# Pardus Paket Yükleyici adı altında bir Gdebi kopyası
 
 "Sık"*)  # Bazı uygulamaların yüklenmesi =========================================================
 
-dpkg -i -R /Yazılım/*.deb
+dpkg -R --install Yazılımlar/
 apt-get -fy install
 
 apt-get install chrome-gnome-shell	# Gnome eklentileri tarayıcı eklentisini yükle
@@ -82,7 +82,7 @@ flatpak remote-add --if-not-exists winepak https://dl.winepak.org/repo/winepak.f
 
 apt install ffmpeg					# Video indirme ve düzenleme programları için gerekli uygulamayı yükle
 
-
+apt autoremove
 
 
 git_check ()
@@ -105,7 +105,8 @@ GNM=".local/share/gnome-shell/extensions"
 
 _FILESS="Şablonlar/*"                   
 _FILESB="Betikler/*"			
-_FILESG="GEklentiler/*"			
+_FILESG="GEklentiler/*"
+				
 
 _USERS="$(awk -F':' '{ if ( $3 >= 500 && $3 <=1000 ) print $1 }' /etc/passwd)" # Kullanıcı listesini al
 
@@ -309,8 +310,6 @@ rm -f -r $HOME/.local/share/gnome-shell/extensions/add-on-desktop@maestroschan.f
 
 rm -f -r /usr/local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
 
-gnome-shell --replace &
-
 ;;
 "Ücretsiz"*)  #  Temel Microsoft ücretsiz fontları yükleme =========================================================
 
@@ -334,7 +333,6 @@ gnome-shell --replace &
 
 "Görsel"*)  # Grub2 Tema Yükleme  =========================================================
 
-
 THEME_DIR="/usr/share/grub/themes"
 THEME_NAME=tela
 GFXBT=4096x2160,1920x1080,1366x768,1024x768,auto
@@ -346,7 +344,7 @@ GFXBT=4096x2160,1920x1080,1366x768,1024x768,auto
 
   # Copy theme
 
-  cp -a /Grub/${THEME_NAME}/* ${THEME_DIR}/${THEME_NAME}
+  cp -a ${THEME_NAME}/* ${THEME_DIR}/${THEME_NAME}
 
   # Set theme
 
