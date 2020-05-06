@@ -15,6 +15,7 @@ Yapılacaklar Listesi
 Yapılanlar
 - Sağ Tık / Yeni menüsü eklendi
 - Sağ Tık / Betikler ile bazı işlemleri yapabilme eklendi.
+- .flatpakref dosyalarını komut yazmadan yüklemek için uygulama eklendi. https://github.com/eersoy93/pardus-flatpak-gui
 - Ücretsiz Windows Fontları eklendi
 - Grub Menüsü güzelleştirildi
 - Gnome masaüstü Sürükle Bırak desteği eklendi
