@@ -28,6 +28,6 @@ Yapılanlar
 - CapsLock tuşuna basınca yukarda küçük bir bir uyarı vermesi sağlandı. https://extensions.gnome.org/extension/36/lock-keys/
 - Eklenti güncellemeleri olduğunda bildirim vermesi https://extensions.gnome.org/extension/1166/extension-update-notifier/ 
 - Bazı diğer ince ayarlar yapıldı.
-   -- Kısayol Oluşturma Etkin
-   -- .Sh ve diğer dosyalar için Çalıştır ya da Göster sorması etkin
-   -- 
+   - Kısayol Oluşturma Etkin
+   - .Sh ve diğer dosyalar için Çalıştır ya da Göster sorması etkin
+ 
