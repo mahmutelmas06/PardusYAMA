@@ -4,4 +4,3 @@
 #Seçili dosyanın tüm izinlerini açar. Sahiplik olarak kullanıcının kendisini ekler. Çalıştırılabilir yapar.
 chmod -R 777 "$1"
 chown -R $USER:$USER "$1"
-chmod  u+x "$1"
