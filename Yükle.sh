@@ -5,7 +5,7 @@
 #  Yazar         : MAHMUT ELMAS
 #  İndirme Linki : https://github.com/mahmutelmas06/PardusYAMA
 #  İletişim      : mahmutelmas06@gmail.com
-#  Sürüm         : 0.1
+#  Sürüm         : 0.2
 #  Bağımlıkıklar : zenity ln
 #  Lisans        : MIT - Diğer eklentilerin kendi lisansları bulunmaktadır
 #
@@ -20,27 +20,34 @@
 #  -Bazı sistemsel ön ayarlar  
 #  -Kullanışlı birkaç Gnome eklentisi
 #  -Grub teması değiştirildi
-#  
-#     
+#  -Sistem ve Yazılım Güncelleştirmelerinin yapılması
+#  -Bazı uygulamaların Flatpak sürümleri  ile değiştirilmesi   
+#  -Yükleme önizleme penceresinin eklenmesi
 #
 #==============================================================================
 
 
-ROOT_UID=0	                        # Root Kimliği
-MAX_DELAY=20                        # Şifre girmek için beklenecek süre
 
-command -v gnome-shell >/dev/null 2>&1 || { zenity --error --text="Sisteminiz Gnome Shell değildir."; exit 1; } # Gnome Shell mi kontrol et. Değilse çıkış yap.
-
-if [ "$UID" -eq "$ROOT_UID" ]; then # Root yetkisi var mı diye kontrol et.
+ROOT_UID=0	                        		# Root Kimliği
+MAX_DELAY=20                        		# Şifre girmek için beklenecek süre
 
 
+if [ "$UID" -eq "$ROOT_UID" ]; then 		# Root yetkisi var mı diye kontrol et.
+
+(
+echo "# Seçim bekleniyor." ; sleep 2
+# command -v gnome-shell >/dev/null 2>&1 || { zenity --error --text="Sisteminiz Gnome Shell değildir."; exit 1; } # Gnome Shell mi kontrol et. Değilse çıkış yap.
+# apt-get -y install zenity 
+
+_USERS="$(eval getent passwd {$(awk '/^UID_MIN/ {print $2}' /etc/login.defs)..$(awk '/^UID_MAX/ {print $2}' /etc/login.defs)} | cut -d: -f1)" # Kullanıcı listesini al
+UHOME="/home"
 
 action=$(zenity --list --checklist \
 	--height 350 --width 700 \
 	--title "İstediğiniz yamaları seçiniz. (Tamamını seçmeniz önerilir)" \
 	--column "Seçim" 	--column "Yapılacak işlem" \
 			  TRUE 				  "Bazı önyüklü uygulamaları kaldır" \
-			  TRUE 				  "Sık kullanılan uygulama ve kütüphaneleri yükle" \
+			  TRUE 				  "Sık kullanılan uygulamaları yükle ve Sistemi Güncelleştir" \
 			  TRUE 				  "Sağ Tık / Yeni menüsünü ekle" \
 			  TRUE 				  "Betikler menüsünü ekle" \
 			  TRUE 				  "Gnome eklentilerini yükle ve sistem ince ayarlarını yap" \
@@ -48,92 +55,141 @@ action=$(zenity --list --checklist \
 			  TRUE 				  "Görsel ve Modern İşletim Sistemi Seçenekleri menüsünü yükle" \
 	--separator=":")
 	
-	
 
 if [ -z "$action" ] ; then
    echo "Seçim yapılmadı"
    exit 1
 fi
 
-IFS=":" ; for word in $action ; do   #  Zenity checklist için çoklu seçim komutu başlat
 
-case $word in "Bazı"*)              # Bazı uygulamaların kaldırılması ============================================
+IFS=":" ; for word in $action ; do   		#  Zenity checklist için çoklu seçim komutu başlat
+case $word in 
 
-apt remove gdebi 					# Pardus Paket Yükleyici adı altında bir Gdebi kopyası zaten yüklü
+
+"Bazı"*)              						# Bazı uygulamaların kaldırılması ============================================
+echo "20"
+echo "# Bazı uygulamalar sistemden kaldırılıyor." ; sleep 2
+
+apt-get -y remove gdebi						# Pardus Paket Yükleyici adı altında bir Gdebi kopyası zaten yüklü
+apt-get -y remove gimp              		# Pinta zaten yüklü. İhtiyaç duyan Gimp yükleyebilir.
+apt-get -y remove vlc						# Totem silinemediği için Vlc silindi. Sistemde 2 adet aynı işi yapan uygulamayı bulundurmamak amacıyla
 
 ;;
 
-"Sık"*)  # Bazı uygulamaların yüklenmesi =========================================================
+"Sık"*)  # Sık kullanjılan bazı uygulamaların yüklenmesi ==================================================================
 
-dpkg -R --install Yazılımlar/
+echo "25"
+echo "# Sistem güncelleniyor." ; sleep 2
+
+apt-get update && apt-get -y upgrade && apt-get -y dist-upgrade								# Sistemi GÜncelleştir
+
+echo "30"
+echo "# Sık kullanılan uygulamalar yükleniyor." ; sleep 2
+
+dpkg -R --install ./Yazılımlar/
 apt-get -fy install
 
-apt-get install chrome-gnome-shell	# Gnome eklentileri tarayıcı eklentisini yükle
+apt-get -y install chrome-gnome-shell		# Gnome eklentileri tarayıcı eklentisini yükle
 
-dpkg --add-architecture i386        # İ386 desteğini etkinleştir
+dpkg --add-architecture i386            	# İ386 desteğini etkinleştir
 
-apt install grub-customizer         # Grub giriş ekranını özelleştir
+apt-get -y install python3-pip          	# Pip komutunu kullanabilmek için gerekli kütüphane
 
-apt install python3-pip             # Pip komutunu kullanabilmek için gerekli kütüphane
+apt-get -y install git
 
-apt install flatpak                                                                         # ------------------------------
+apt-get -y install flatpak                                                                  # ------------------------------
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo     # Flatpak desteğini etkinleştir
 flatpak remote-add --if-not-exists winepak https://dl.winepak.org/repo/winepak.flatpakrepo  # ------------------------------
 
-apt install ffmpeg					# Video indirme ve düzenleme programları için gerekli uygulamayı yükle
+apt-get -y install ffmpeg					# Video indirme ve düzenleme programları için gerekli uygulamayı yükle
+apt-get -y install imagemagick				# Resim indirme ve düzenleme programları için gerekli uygulamayı yükle
 
-apt autoremove
-
-
-git_check ()
-{
-  echo "Checking for git ..."
-  if command -v git > /dev/null; then
-    echo "Detected git ..."
-  else
-    echo "Installing git"
-    apt install -y git				# Git yükle
-  fi
-}
+apt-get -y install icoutils
+apt-get -y insatll gir1.2-flatpak-1.0
 
 
-UHOME="/home"
-SAB="Şablonlar"
-BET=".local/share/nautilus/scripts"
-CONF=".config"
-GNM=".local/share/gnome-shell/extensions" 
+# Uygulamaların Flatpak sürümleriyle değiştirilmesi
 
-_FILESS="Şablonlar/*"                   
-_FILESB="Betikler/*"			
-_FILESG="GEklentiler/*"
-				
+echo "35"
+echo "# Bazı yazılımlar Flatpak sürümleri ile değiştirilip güncelleştiriliyor." ; sleep 2
 
-_USERS="$(awk -F':' '{ if ( $3 >= 500 && $3 <=1000 ) print $1 }' /etc/passwd)" # Kullanıcı listesini al
+apt-get -y remove thunderbird
+flatpak install flathub org.gnome.Geary
+
+apt-get -y purge libreoffice
+flatpak install flathub org.libreoffice.LibreOffice
+
+# Sekmeli görüntü aktifleştirilecek
+# Yeni simge paketi yüklenecek
+
+
+# Firefox yükle ve ayarlarını yap
+
+apt-get -y remove firefox-esr
+flatpak install flathub org.mozilla.firefox
+
+#user_pref("browser.startup.homepage", "https://vuhuv.com.tr/");
+#user_pref("app.shield.optoutstudies.enabled", false);
+#user_pref("browser.download.useDownloadDir", false);
+#user_pref("browser.newtabpage.activity-stream.feeds.snippets", false);
+#user_pref("browser.newtabpage.activity-stream.section.highlights.includeDownloads", false);
+#user_pref("browser.newtabpage.activity-stream.section.highlights.includePocket", false);
+#user_pref("browser.newtabpage.activity-stream.section.highlights.includeVisited", false);
+#user_pref("browser.safebrowsing.malware.enabled", false);
+#user_pref("browser.safebrowsing.phishing.enabled", false);
+#user_pref("browser.shell.checkDefaultBrowser", true);
+#user_pref("browser.startup.page", 3);
+#user_pref("browser.tabs.drawInTitlebar", true);
+#user_pref("browser.tabs.extraDragSpace", true);
+#user_pref("browser.uiCustomization.state", "{\"placements\":{\"widget-overflow-fixed-list\":[],\"nav-bar\":[\"back-button\",\"forward-button\",\"stop-reload-button\",\"find-button\",\"customizableui-special-spring5\",\"urlbar-container\",\"customizableui-special-spring2\",\"downloads-button\",\"history-panelmenu\",\"bookmarks-menu-button\",\"fxa-toolbar-menu-button\"],\"toolbar-menubar\":[\"menubar-items\"],\"TabsToolbar\":[\"tabbrowser-tabs\",\"new-tab-button\",\"alltabs-button\"],\"PersonalToolbar\":[\"personal-bookmarks\"]},\"seen\":[\"developer-button\"],\"dirtyAreaCache\":[\"nav-bar\",\"toolbar-menubar\",\"TabsToolbar\",\"PersonalToolbar\"],\"currentVersion\":16,\"newElementCount\":6}");
+#user_pref("browser.uidensity", 2);
+#user_pref("datareporting.healthreport.uploadEnabled", false);
+#user_pref("extensions.pendingOperations", true);
+#user_pref("extensions.ui.dictionary.hidden", true);
+#user_pref("extensions.ui.lastCategory", "addons://discover/");
+#user_pref("extensions.ui.locale.hidden", false);
+#user_pref("media.eme.enabled", true);
+#ser_pref("pref.general.disable_button.default_browser", false);
+#user_pref("privacy.donottrackheader.enabled", true);
+#user_pref("toolkit.telemetry.cachedClientID", "c0ffeec0-ffee-c0ff-eec0-ffeec0ffeec0");
+
+echo "39"
+echo "# Kalıntılar temizleniyor." ; sleep 2
+
+apt-get -y autoremove																		# Kalıntıları sil
+
+
 
 ;;
 
-"Sağ"*)  # Şablonları Yükle =========================================================
 
+
+"Sağ"*)  # Şablonları Yükle ============================================================================================
+echo "45"
+echo "# Şablonlar oluşturuluyor." ; sleep 2
+
+SAB="Şablonlar"
+CONF=".config"
+_FILESS="./Şablonlar/*"  
 
 for u in $_USERS
 do
-  mkdir "${UHOME}/${u}/${SAB}"    #  Şablonlar klasörü oluşturulsun
 
   _dir="${UHOME}/${u}"
+  
+  # .config/user-dirs.dirs dosyası yoksa oluştur.
 
-
-# .config/user-dirs.dirs dosyası yoksa oluştur.
-
-	if [[ ! -f $_dir/${CONF}/user-dirs.dirs ]];
+	if [[ ! -f "$_dir/${SAB}"/user-dirs.dirs ]];
 	then
+	
 		xdg-user-dirs-update
-		echo "Config dosyası oluşturuldu.."
+		
 	else
 
-		source $_dir/${CONF}/user-dirs.dirs
-		if [[ $XDG_Templates_DIR = "$HOME/Şablonlar" ]]
+		source "$_dir"/.config/user-dirs.dirs
+		if [[ $XDG_Templates_DIR = "$_dir/${SAB}" ]]
 		then
-			echo "Herşey hazır durumda. Çıkılıyor.."
+		echo "Herşey hazır durumda. Çıkılıyor.."
 		fi
 
 	fi
@@ -141,90 +197,79 @@ do
    for f in $_FILESS
    do
     
-     
-     if [ -d "$_dir" ]
-     then
-
-       file_name=`basename ${f}
 
        cp -r "${f}" "$_dir/${SAB}" #  Şablonları kopyala
 
-	`
+       find "$_dir/${SAB}/" -type f -exec chmod 777 {} \+ # Şablon izinleri
+       
+       chown $(id -un $u):$(id -gn $u) "$_dir/${SAB}/"
 
-       find "${f}" "$_dir/${SAB}" -type f -exec chmod 777 {} \+ # Şablon izinleri
-
-
-     fi
 done
 done
+  
+
+
 
 ;;
 
-"Betikler"*)  # Betikleri Yükle =========================================================
+"Betikler"*)  # Betikleri Yükle ============================================================================================
+echo "50"
+echo "# Betikler yükleniyor." ; sleep 2
 
+
+BET=".local/share/nautilus/scripts"               
+_FILESB="./Betikler/*"	
 
 for u in $_USERS
 do
-
-  mkdir "${UHOME}/${u}/${BET}"    #  Betikler klasörü oluşturulsun
-
 
   _dir="${UHOME}/${u}"
 
    for f in $_FILESB
    do
     
-     
-     if [ -d "$_dir" ]
-     then
-
-       file_name=`basename ${f}
 
        cp -r "${f}" "$_dir/${BET}" #  Betikleri kopyala
 
+       find "$_dir/${BET}/" -type f -exec chmod 777 {} \+ # Betik izinleri
+       
+       chown $(id -un $u):$(id -gn $u) "$_dir/${BET}/"
 
-	`
-       find "${f}" "$_dir/${BET}" -type f -exec chmod 777 {} \+ # Betik izinleri
-
-     fi
 done
 done
 
 ;;
 
-"Gnome"*)  # GNOME EKLENTİLERİNİ Yükle =========================================================
+"Gnome"*)  # GNOME EKLENTİLERİNİ Yükle ==============================================================================
+echo "55"
+echo "# Gnome eklentileri yükleniyor." ; sleep 2
 
+GNM=".local/share/gnome-shell/extensions" 		
+_FILESG="./GEklentiler/*"
 
 for u in $_USERS
 do
 
-  mkdir "${UHOME}/${u}/${GNM}"    #  Betikler klasörü oluşturulsun
-
-
   _dir="${UHOME}/${u}"
-
 
    for f in $_FILESG
    do
     
-     
-     if [ -d "$_dir" ]
-     then
 
-       file_name=`basename ${f}
+       cp -r "${f}" "$_dir/${GNM}" #  Dosyaları kopyala
 
-       cp -r "${f}" "$_dir/${GNM}" #  EKLENTİLERİ kopyala
+       find "$_dir/${GNM}/" -type f -exec chmod 777 {} \+ # Eklenti izinleri
+       
+       chown $(id -un $u):$(id -gn $u) "$_dir/${GNM}/"
 
-
-	`
-       find "${f}" "$_dir/${GNM}" -type f -exec chmod 777 {} \+ # EKLENTİ izinleri
-
-     fi
 done
 done
 
 
 # Gnome Ayarları  # # # # # # # # # # # # # # # # # # # # # # #  # # # #
+
+echo "60"
+echo "# Sistem ince ayarları yapılıyor." ; sleep 2
 
 dconf write /org/gnome/nautilus/preferences/executable-text-activation "'ask'"
 
@@ -272,8 +317,6 @@ gnome-shell-extension-tool -e arc-menu@linxgem33.com
 
 gnome-shell-extension-tool -e custom-hot-corners@janrunx.gmail.com
 
-gnome-shell-extension-tool -e bluetooth-quick-connect@bjarosze.gmail.com
-
 gnome-shell-extension-tool -d clipboard-indicator@tudmotu.com
 
 gnome-shell-extension-tool -e ding@rastersoft.com
@@ -306,12 +349,21 @@ gnome-shell-extension-tool -d places-menu@gnome-shell-extensions.gcampax.github.
 
 gnome-shell-extension-tool -d window-list@gnome-shell-extensions.gcampax.github.com
 
-rm -f -r $HOME/.local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
-
 rm -f -r /usr/local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
+
+for u in $_USERS
+do
+
+rm -f -r "${UHOME}/${u}"/.local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
+
+done
+
+
 
 ;;
 "Ücretsiz"*)  #  Temel Microsoft ücretsiz fontları yükleme =========================================================
+echo "70"
+echo "# Windows fontları yükleniyor." ; sleep 2
 
 
 	# /usr/share/fonts/truetype/msttcorefonts kasörü var mı kontrol et
@@ -319,11 +371,11 @@ rm -f -r /usr/local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
 	then
 		mkdir /usr/share/fonts/truetype/msttcorefonts
 		cp -r Fontlar/* /usr/share/fonts/truetype/msttcorefonts
-		echo -e "\nFontlar yüklendi.."
+		echo -e "\Fontlar yüklendi.."
 	else
 		# varsa yeni klasör oluşturmayı atla
 		cp -r Fontlar/* /usr/share/fonts/truetype/msttcorefonts
-		echo "\nÜcretsiz Windows Fontları yüklendi."
+		echo "\Ücretsiz Windows Fontları yüklendi."
 	fi
 
 	find /usr/share/fonts/truetype/msttcorefonts -type f -exec chmod 775 {} \+
@@ -331,7 +383,9 @@ rm -f -r /usr/local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
 
 ;;
 
-"Görsel"*)  # Grub2 Tema Yükleme  =========================================================
+"Görsel"*)  # Grub2 Tema Yükleme  =====================================================================================
+echo "90"
+echo "# Yeni Grub teması yükleniyor." ; sleep 2
 
 THEME_DIR="/usr/share/grub/themes"
 THEME_NAME=tela
@@ -353,12 +407,14 @@ GFXBT=4096x2160,1920x1080,1366x768,1024x768,auto
 
   grep "GRUB_THEME=" /etc/default/grub 2>&1 >/dev/null && sed -i '/GRUB_THEME=/d' /etc/default/grub
   echo "GRUB_THEME=\"${THEME_DIR}/${THEME_NAME}/theme.txt\"" >> /etc/default/grub
+  grep "GRUB_GFXMODE=" /etc/default/grub 2>&1 >/dev/null && sed -i '/GRUB_GFXMODE=/d' /etc/default/grub
   echo "GRUB_GFXMODE=\"${GFXBT}\"" >> /etc/default/grub
+  grep "GRUB_GFXPAYLOAD_LINUX=" /etc/default/grub 2>&1 >/dev/null && sed -i '/GRUB_GFXPAYLOAD_LINUX=/d' /etc/default/grub
   echo "GRUB_GFXPAYLOAD_LINUX=\"${GFXBT}\"" >> /etc/default/grub
 
-  # Update grub config
+  
 
-    update-grub
+  update-grub			# Yeni grub ayarları güncellenerek etkinleştirilsin
 
 ;;      
 esac
@@ -372,6 +428,18 @@ done   #  Zenity checklist için çoklu seçim komutu kapat
 
 notify-send -t 2000 -i /usr/share/icons/gnome/32x32/status/info.png "İşlem Tamamlanmıştır"
 
+echo "# Tamamlandı." ; sleep 2
+echo "100"
+) |
+zenity --progress \
+  --title="Yükleme İlerlemesi" \
+  --text="Yönetici yetkileri sağlanıyor." \
+  --percentage=0 \
+  --pulsate
+
+(( $? != 0 )) && zenity --error --text="Error in zenity command."
+
+exit 0
 
 else
 
@@ -387,5 +455,6 @@ else
     exit 1
   }
 fi
+
 
 
