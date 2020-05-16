@@ -40,6 +40,7 @@ echo "# Seçim bekleniyor." ; sleep 2
 # apt-get -y install zenity 
 
 _USERS="$(eval getent passwd {$(awk '/^UID_MIN/ {print $2}' /etc/login.defs)..$(awk '/^UID_MAX/ {print $2}' /etc/login.defs)} | cut -d: -f1)" # Kullanıcı listesini al
+USER_UID=$(id -u ${_USERS})
 UHOME="/home"
 
 action=$(zenity --list --checklist \
@@ -97,6 +98,8 @@ apt-get -y install python3-pip          	# Pip komutunu kullanabilmek için gere
 
 apt-get -y install git
 
+
+
 apt-get -y install flatpak                                                                  # ------------------------------
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo     # Flatpak desteğini etkinleştir
 flatpak remote-add --if-not-exists winepak https://dl.winepak.org/repo/winepak.flatpakrepo  # ------------------------------
@@ -105,7 +108,16 @@ apt-get -y install ffmpeg					# Video indirme ve düzenleme programları için g
 apt-get -y install imagemagick				# Resim indirme ve düzenleme programları için gerekli uygulamayı yükle
 
 apt-get -y install icoutils
-apt-get -y insatll gir1.2-flatpak-1.0
+apt-get -y install gir1.2-flatpak-1.0
+
+
+# Wine yükleniyor ve yapılandırılıyor
+echo "33"
+echo "# Wine yükleniyor ve yapılandırılıyor." ; sleep 2
+
+apt-get -y install wine
+apt-get -y install winetricks
+winetricks -q directx9 dxvk flash vcrun2005 vcrun2008 vcrun2010 vcrun2003 vcrun2015 vcrun2017 vcrun6sp6 xinput
 
 
 # Uygulamaların Flatpak sürümleriyle değiştirilmesi
@@ -271,88 +283,89 @@ done
 echo "60"
 echo "# Sistem ince ayarları yapılıyor." ; sleep 2
 
-dconf write /org/gnome/nautilus/preferences/executable-text-activation "'ask'"
-
-dconf write /org/gnome/nautilus/preferences/show-create-link true
-
-dconf write /org/gnome/nautilus/icon-view/captions "['size', 'none', 'none']"
-
-dconf write /org/gnome/desktop/background/show-desktop-icons true
-
-dconf write /org/gnome/desktop/sound/allow-volume-above-100-percent true
-
-dconf write /org/gnome/login-screen/disable-restart-buttons false
-
-dconf write /org/gnome/shell/extensions/apt-update-indicator/autoremovable-packages false
-
-dconf write /org/gnome/shell/extensions/apt-update-indicator/new-packages false
-
-dconf write /org/gnome/shell/extensions/apt-update-indicator/obsolete-packages false
-
-dconf write /org/gnome/shell/extensions/apt-update-indicator/residual-packages false
-
-dconf write /org/gnome/shell/extensions/arc-menu/show-external-devices true
-
-dconf write /org/gnome/shell/extensions/arc-menu/menu-button-icon "'Start_Box'"
-
-dconf write /org/gnome/shell/extensions/arc-menu/enable-sub-menus true
-
-dconf write /org/gnome/desktop/wm/keybindings/panel-main-menu "['Super_R']"
-
-dconf write /org/gnome/shell/extensions/dash-to-panel/show-appmenu false
-
-dconf write /org/gnome/shell/extensions/laine/merge-controls true
-
-dconf write /org/gnome/shell/extensions/lockkeys/style "'show-hide'"
-
-dconf write /org/gnome/shell/window-switcher/app-icon-mode "'both'"
-
-gnome-shell-extension-tool -e add-on-desktop@maestroschan.fr
-
-gnome-shell-extension-tool -e appfolders-manager@maestroschan.fr
-
-gnome-shell-extension-tool -e applications-overview-tooltip@RaphaelRochet
-
-gnome-shell-extension-tool -e arc-menu@linxgem33.com
-
-gnome-shell-extension-tool -e custom-hot-corners@janrunx.gmail.com
-
-gnome-shell-extension-tool -d clipboard-indicator@tudmotu.com
-
-gnome-shell-extension-tool -e ding@rastersoft.com
-
-gnome-shell-extension-tool -d gnome-shell-screenshot@ttll.de
-
-gnome-shell-extension-tool -e gsconnect@andyholmes.github.io
-
-gnome-shell-extension-tool -e laine@knasher.gmail.com
-
-gnome-shell-extension-tool -e lockkeys@vaina.lt
-
-gnome-shell-extension-tool -e noannoyance@daase.net
-
-gnome-shell-extension-tool -e soft-brightness@fifi.org
-
-gnome-shell-extension-tool -e tweaks-system-menu@extensions.gnome-shell.fifi.org
-
-gnome-shell-extension-tool -e update-extensions@franglais125.gmail.com
-
-gnome-shell-extension-tool -e alternate-tab@gnome-shell-extensions.gcampax.github.com
-
-gnome-shell-extension-tool -e user-theme@gnome-shell-extensions.gcampax.github.com
-
-gnome-shell-extension-tool -d apps-menu@gnome-shell-extensions.gcampax.github.com
-
-gnome-shell-extension-tool -d drive-menu@gnome-shell-extensions.gcampax.github.com
-
-gnome-shell-extension-tool -d places-menu@gnome-shell-extensions.gcampax.github.com
-
-gnome-shell-extension-tool -d window-list@gnome-shell-extensions.gcampax.github.com
-
-rm -f -r /usr/local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
-
 for u in $_USERS
 do
+
+
+sudo -u ${u} gnome-shell-extension-tool -e arc-menu@linxgem33.com
+
+sudo -u ${u} dconf write /org/gnome/nautilus/preferences/executable-text-activation "'ask'"
+
+sudo -u ${u} dconf write /org/gnome/nautilus/preferences/show-create-link true
+
+sudo -u ${u} dconf write /org/gnome/nautilus/icon-view/captions "['size', 'none', 'none']"
+
+sudo -u ${u} dconf write /org/gnome/desktop/background/show-desktop-icons true
+
+sudo -u ${u} dconf write /org/gnome/desktop/sound/allow-volume-above-100-percent true
+
+sudo -u ${u} dconf write /org/gnome/login-screen/disable-restart-buttons false
+
+sudo -u ${u} dconf write /org/gnome/shell/extensions/apt-update-indicator/autoremovable-packages false
+
+sudo -u ${u} dconf write /org/gnome/shell/extensions/apt-update-indicator/new-packages false
+
+sudo -u ${u} dconf write /org/gnome/shell/extensions/apt-update-indicator/obsolete-packages false
+
+sudo -u ${u} dconf write /org/gnome/shell/extensions/apt-update-indicator/residual-packages false
+
+sudo -u ${u} dconf write /org/gnome/shell/extensions/arc-menu/show-external-devices true
+
+sudo -u ${u} dconf write /org/gnome/shell/extensions/arc-menu/menu-button-icon "'Start_Box'"
+
+sudo -u ${u} dconf write /org/gnome/shell/extensions/arc-menu/enable-sub-menus true
+
+sudo -u ${u} dconf write /org/gnome/desktop/wm/keybindings/panel-main-menu "['Super_R']"
+
+sudo -u ${u} dconf write /org/gnome/shell/extensions/dash-to-panel/show-appmenu false
+
+sudo -u ${u} dconf write /org/gnome/shell/extensions/laine/merge-controls true
+
+sudo -u ${u} dconf write /org/gnome/shell/extensions/lockkeys/style "'show-hide'"
+
+sudo -u ${u} dconf write /org/gnome/shell/window-switcher/app-icon-mode "'both'"
+
+sudo -u ${u} gnome-shell-extension-tool -e add-on-desktop@maestroschan.fr
+
+sudo -u ${u} gnome-shell-extension-tool -e appfolders-manager@maestroschan.fr
+
+sudo -u ${u} gnome-shell-extension-tool -e applications-overview-tooltip@RaphaelRochet
+
+sudo -u ${u} gnome-shell-extension-tool -e custom-hot-corners@janrunx.gmail.com
+
+sudo -u ${u} gnome-shell-extension-tool -d clipboard-indicator@tudmotu.com
+
+sudo -u ${u} gnome-shell-extension-tool -e ding@rastersoft.com
+
+sudo -u ${u} gnome-shell-extension-tool -d gnome-shell-screenshot@ttll.de
+
+sudo -u ${u} gnome-shell-extension-tool -e gsconnect@andyholmes.github.io
+
+sudo -u ${u} gnome-shell-extension-tool -e laine@knasher.gmail.com
+
+sudo -u ${u} gnome-shell-extension-tool -e lockkeys@vaina.lt
+
+sudo -u ${u} gnome-shell-extension-tool -e noannoyance@daase.net
+
+sudo -u ${u} gnome-shell-extension-tool -e soft-brightness@fifi.org
+
+sudo -u ${u} gnome-shell-extension-tool -e tweaks-system-menu@extensions.gnome-shell.fifi.org
+
+sudo -u ${u} gnome-shell-extension-tool -e update-extensions@franglais125.gmail.com
+
+sudo -u ${u} gnome-shell-extension-tool -e alternate-tab@gnome-shell-extensions.gcampax.github.com
+
+sudo -u ${u} gnome-shell-extension-tool -e user-theme@gnome-shell-extensions.gcampax.github.com
+
+sudo -u ${u} gnome-shell-extension-tool -d apps-menu@gnome-shell-extensions.gcampax.github.com
+
+sudo -u ${u} gnome-shell-extension-tool -d drive-menu@gnome-shell-extensions.gcampax.github.com
+
+sudo -u ${u} gnome-shell-extension-tool -d places-menu@gnome-shell-extensions.gcampax.github.com
+
+sudo -u ${u} gnome-shell-extension-tool -d window-list@gnome-shell-extensions.gcampax.github.com
+
+rm -f -r /usr/local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
 
 rm -f -r "${UHOME}/${u}"/.local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
 
