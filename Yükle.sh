@@ -34,14 +34,28 @@ MAX_DELAY=20                        		# Şifre girmek için beklenecek süre
 
 if [ "$UID" -eq "$ROOT_UID" ]; then 		# Root yetkisi var mı diye kontrol et.
 
+
+#==============================================================================
+
 (
-echo "# Seçim bekleniyor." ; sleep 2
+echo "# Seçim bekleniyor." ; sleep 2  		# Zenity yükleme göstergesi başlangıç
+
+#==============================================================================
+
+
 # command -v gnome-shell >/dev/null 2>&1 || { zenity --error --text="Sisteminiz Gnome Shell değildir."; exit 1; } # Gnome Shell mi kontrol et. Değilse çıkış yap.
 # apt-get -y install zenity 
 
+
+#==============================================================================
+
 _USERS="$(eval getent passwd {$(awk '/^UID_MIN/ {print $2}' /etc/login.defs)..$(awk '/^UID_MAX/ {print $2}' /etc/login.defs)} | cut -d: -f1)" # Kullanıcı listesini al
-USER_UID=$(id -u ${_USERS})
+RUSER_UID=$(id -u ${_USERS})
 UHOME="/home"
+
+
+#==============================================================================
+
 
 action=$(zenity --list --checklist \
 	--height 350 --width 700 \
@@ -66,25 +80,29 @@ fi
 IFS=":" ; for word in $action ; do   		#  Zenity checklist için çoklu seçim komutu başlat
 case $word in 
 
+#==============================================================================
+
 
 "Bazı"*)              						# Bazı uygulamaların kaldırılması ============================================
-echo "20"
+echo "5"
 echo "# Bazı uygulamalar sistemden kaldırılıyor." ; sleep 2
 
 apt-get -y remove gdebi						# Pardus Paket Yükleyici adı altında bir Gdebi kopyası zaten yüklü
 apt-get -y remove gimp              		# Pinta zaten yüklü. İhtiyaç duyan Gimp yükleyebilir.
 apt-get -y remove vlc						# Totem silinemediği için Vlc silindi. Sistemde 2 adet aynı işi yapan uygulamayı bulundurmamak amacıyla
 
+# Buraya ayrıca sistem önbelleği/ gereksiz dosyaları temizleme kodları eklenecek
+
 ;;
 
 "Sık"*)  # Sık kullanjılan bazı uygulamaların yüklenmesi ==================================================================
 
-echo "25"
+echo "15"
 echo "# Sistem güncelleniyor." ; sleep 2
 
 apt-get update && apt-get -y upgrade && apt-get -y dist-upgrade								# Sistemi GÜncelleştir
 
-echo "30"
+echo "20"
 echo "# Sık kullanılan uygulamalar yükleniyor." ; sleep 2
 
 dpkg -R --install ./Yazılımlar/
@@ -97,8 +115,6 @@ dpkg --add-architecture i386            	# İ386 desteğini etkinleştir
 apt-get -y install python3-pip          	# Pip komutunu kullanabilmek için gerekli kütüphane
 
 apt-get -y install git
-
-
 
 apt-get -y install flatpak                                                                  # ------------------------------
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo     # Flatpak desteğini etkinleştir
@@ -117,7 +133,7 @@ echo "# Wine yükleniyor ve yapılandırılıyor." ; sleep 2
 
 apt-get -y install wine
 apt-get -y install winetricks
-winetricks -q directx9 dxvk flash vcrun2005 vcrun2008 vcrun2010 vcrun2003 vcrun2015 vcrun2017 vcrun6sp6 xinput
+winetricks -q directx9 vcrun2005 vcrun2008 vcrun2010 vcrun2003 vcrun2015 vcrun2017 vcrun6sp6
 
 
 # Uygulamaların Flatpak sürümleriyle değiştirilmesi
@@ -140,6 +156,8 @@ flatpak install flathub org.libreoffice.LibreOffice
 apt-get -y remove firefox-esr
 flatpak install flathub org.mozilla.firefox
 
+
+#============================================================================== Bunlar bir köşede dursun userpref.js
 #user_pref("browser.startup.homepage", "https://vuhuv.com.tr/");
 #user_pref("app.shield.optoutstudies.enabled", false);
 #user_pref("browser.download.useDownloadDir", false);
@@ -269,8 +287,10 @@ do
     
 
        cp -r "${f}" "$_dir/${GNM}" #  Dosyaları kopyala
+       cp -r "${f}" "/usr/share/gnome-shell/extensions" #  Dosyaları sistem dizinine kopyala
 
        find "$_dir/${GNM}/" -type f -exec chmod 777 {} \+ # Eklenti izinleri
+       find "/usr/share/gnome-shell/extensions" -type f -exec chmod 777 {} \+ # Sistem eklenti izinleri
        
        chown $(id -un $u):$(id -gn $u) "$_dir/${GNM}/"
 
@@ -283,93 +303,96 @@ done
 echo "60"
 echo "# Sistem ince ayarları yapılıyor." ; sleep 2
 
-for u in $_USERS
-do
 
 
-sudo -u ${u} gnome-shell-extension-tool -e arc-menu@linxgem33.com
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e arc-menu@linxgem33.com
 
-sudo -u ${u} dconf write /org/gnome/nautilus/preferences/executable-text-activation "'ask'"
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e arc-menu@linxgem33.com
 
-sudo -u ${u} dconf write /org/gnome/nautilus/preferences/show-create-link true
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/nautilus/preferences/executable-text-activation "'ask'"
 
-sudo -u ${u} dconf write /org/gnome/nautilus/icon-view/captions "['size', 'none', 'none']"
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/nautilus/preferences/show-create-link true
 
-sudo -u ${u} dconf write /org/gnome/desktop/background/show-desktop-icons true
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/nautilus/icon-view/captions "['size', 'none', 'none']"
 
-sudo -u ${u} dconf write /org/gnome/desktop/sound/allow-volume-above-100-percent true
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/background/show-desktop-icons true
 
-sudo -u ${u} dconf write /org/gnome/login-screen/disable-restart-buttons false
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/sound/allow-volume-above-100-percent true
 
-sudo -u ${u} dconf write /org/gnome/shell/extensions/apt-update-indicator/autoremovable-packages false
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/login-screen/disable-restart-buttons false
 
-sudo -u ${u} dconf write /org/gnome/shell/extensions/apt-update-indicator/new-packages false
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/apt-update-indicator/autoremovable-packages false
 
-sudo -u ${u} dconf write /org/gnome/shell/extensions/apt-update-indicator/obsolete-packages false
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/apt-update-indicator/new-packages false
 
-sudo -u ${u} dconf write /org/gnome/shell/extensions/apt-update-indicator/residual-packages false
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/apt-update-indicator/obsolete-packages false
 
-sudo -u ${u} dconf write /org/gnome/shell/extensions/arc-menu/show-external-devices true
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/apt-update-indicator/residual-packages false
 
-sudo -u ${u} dconf write /org/gnome/shell/extensions/arc-menu/menu-button-icon "'Start_Box'"
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/arc-menu/show-external-devices true
 
-sudo -u ${u} dconf write /org/gnome/shell/extensions/arc-menu/enable-sub-menus true
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/arc-menu/menu-button-icon "'Start_Box'"
 
-sudo -u ${u} dconf write /org/gnome/desktop/wm/keybindings/panel-main-menu "['Super_R']"
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/arc-menu/enable-sub-menus true
 
-sudo -u ${u} dconf write /org/gnome/shell/extensions/dash-to-panel/show-appmenu false
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/wm/keybindings/panel-main-menu "['Super_R']"
 
-sudo -u ${u} dconf write /org/gnome/shell/extensions/laine/merge-controls true
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/dash-to-panel/show-appmenu false
 
-sudo -u ${u} dconf write /org/gnome/shell/extensions/lockkeys/style "'show-hide'"
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/laine/merge-controls true
 
-sudo -u ${u} dconf write /org/gnome/shell/window-switcher/app-icon-mode "'both'"
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/lockkeys/style "'show-hide'"
 
-sudo -u ${u} gnome-shell-extension-tool -e add-on-desktop@maestroschan.fr
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/window-switcher/app-icon-mode "'both'"
 
-sudo -u ${u} gnome-shell-extension-tool -e appfolders-manager@maestroschan.fr
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e add-on-desktop@maestroschan.fr
 
-sudo -u ${u} gnome-shell-extension-tool -e applications-overview-tooltip@RaphaelRochet
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e appfolders-manager@maestroschan.fr
 
-sudo -u ${u} gnome-shell-extension-tool -e custom-hot-corners@janrunx.gmail.com
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e applications-overview-tooltip@RaphaelRochet
 
-sudo -u ${u} gnome-shell-extension-tool -d clipboard-indicator@tudmotu.com
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e custom-hot-corners@janrunx.gmail.com
 
-sudo -u ${u} gnome-shell-extension-tool -e ding@rastersoft.com
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -d clipboard-indicator@tudmotu.com
 
-sudo -u ${u} gnome-shell-extension-tool -d gnome-shell-screenshot@ttll.de
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e ding@rastersoft.com
 
-sudo -u ${u} gnome-shell-extension-tool -e gsconnect@andyholmes.github.io
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -d gnome-shell-screenshot@ttll.de
 
-sudo -u ${u} gnome-shell-extension-tool -e laine@knasher.gmail.com
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e gsconnect@andyholmes.github.io
 
-sudo -u ${u} gnome-shell-extension-tool -e lockkeys@vaina.lt
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e laine@knasher.gmail.com
 
-sudo -u ${u} gnome-shell-extension-tool -e noannoyance@daase.net
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e lockkeys@vaina.lt
 
-sudo -u ${u} gnome-shell-extension-tool -e soft-brightness@fifi.org
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e noannoyance@daase.net
 
-sudo -u ${u} gnome-shell-extension-tool -e tweaks-system-menu@extensions.gnome-shell.fifi.org
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e soft-brightness@fifi.org
 
-sudo -u ${u} gnome-shell-extension-tool -e update-extensions@franglais125.gmail.com
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e tweaks-system-menu@extensions.gnome-shell.fifi.org
 
-sudo -u ${u} gnome-shell-extension-tool -e alternate-tab@gnome-shell-extensions.gcampax.github.com
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e update-extensions@franglais125.gmail.com
 
-sudo -u ${u} gnome-shell-extension-tool -e user-theme@gnome-shell-extensions.gcampax.github.com
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e alternate-tab@gnome-shell-extensions.gcampax.github.com
 
-sudo -u ${u} gnome-shell-extension-tool -d apps-menu@gnome-shell-extensions.gcampax.github.com
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e user-theme@gnome-shell-extensions.gcampax.github.com
 
-sudo -u ${u} gnome-shell-extension-tool -d drive-menu@gnome-shell-extensions.gcampax.github.com
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -d apps-menu@gnome-shell-extensions.gcampax.github.com
 
-sudo -u ${u} gnome-shell-extension-tool -d places-menu@gnome-shell-extensions.gcampax.github.com
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -d drive-menu@gnome-shell-extensions.gcampax.github.com
 
-sudo -u ${u} gnome-shell-extension-tool -d window-list@gnome-shell-extensions.gcampax.github.com
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -d places-menu@gnome-shell-extensions.gcampax.github.com
 
-rm -f -r /usr/local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -d window-list@gnome-shell-extensions.gcampax.github.com
 
-rm -f -r "${UHOME}/${u}"/.local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
+rm -rf  /usr/local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr/
 
-done
+rm -rf ${UHOME}/${_USERS}/.local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr/
+
+
+dconf update
+
+
 
 
 
