@@ -1,7 +1,0 @@
-[Desktop Entry]
-Name=Yükle
-Comment=Yüklemeye başlayın
-Icon=/usr/share/icons/hicolor/32x32/apps/gnome-system-monitor.png
-Exec=/Yükle.sh
-Terminal=true
-Type=Application
