@@ -144,8 +144,10 @@ echo "# Bazı yazılımlar Flatpak sürümleri ile değiştirilip güncelleştir
 apt-get -y remove thunderbird
 flatpak install flathub org.gnome.Geary
 
+flatpak install -y flathub org.gnome.Lollypop
+
 apt-get -y purge libreoffice
-flatpak install flathub org.libreoffice.LibreOffice
+flatpak install -y flathub org.libreoffice.LibreOffice
 
 # Sekmeli görüntü aktifleştirilecek
 # Yeni simge paketi yüklenecek
@@ -154,7 +156,7 @@ flatpak install flathub org.libreoffice.LibreOffice
 # Firefox yükle ve ayarlarını yap
 
 apt-get -y remove firefox-esr
-flatpak install flathub org.mozilla.firefox
+flatpak install -y flathub org.mozilla.firefox
 
 
 #============================================================================== Bunlar bir köşede dursun userpref.js
@@ -335,6 +337,8 @@ sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus
 
 sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/arc-menu/enable-sub-menus true
 
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/arc-menu/enable-pinned-apps false
+
 sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/wm/keybindings/panel-main-menu "['Super_R']"
 
 sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/dash-to-panel/show-appmenu false
@@ -369,8 +373,6 @@ sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus
 
 sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e soft-brightness@fifi.org
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e tweaks-system-menu@extensions.gnome-shell.fifi.org
-
 sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e update-extensions@franglais125.gmail.com
 
 sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e alternate-tab@gnome-shell-extensions.gcampax.github.com
@@ -385,9 +387,31 @@ sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus
 
 sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -d window-list@gnome-shell-extensions.gcampax.github.com
 
-rm -rf  /usr/local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr/
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/nautilus/list-view/use-tree-view true
+  
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/mutter/overlay-key 'Super_L'
+  
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/arc-menu/application-shortcuts-list "[['Pardus Mağaza', '/usr/share/pardus/pardus-store/icon.svg', 'pardus-store.desktop'], ['Terminal', 'utilities-terminal-symbolic', 'gnome-terminal'], ['Activities Overview', 'view-fullscreen-symbolic', 'ArcMenu_ActivitiesOverview']]"
 
-rm -rf ${UHOME}/${_USERS}/.local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr/
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/arc-menu/directory-shortcuts-list "[['Ev', 'user-home-symbolic', 'ArcMenu_Home'], ['İndirilenler', '. GThemedIcon folder-download-symbolic folder-symbolic folder-download folder', 'ArcMenu_Downloads'], ['Bilgisayar', 'drive-harddisk-symbolic', 'ArcMenu_Computer'], ['Ağ', 'network-workgroup-symbolic', 'ArcMenu_Network']]"
+
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/arc-menu/pinned-app-list "['Terminal', 'utilities-terminal', 'org.gnome.Terminal.desktop', 'Pardus Flatpak GUI', 'applications-system', 'tr.org.pardus.pardus_flatpak_gui.desktop', 'Pardus Mağaza', '/usr/share/pardus/pardus-store/icon.svg', 'pardus-store.desktop', 'Firefox', 'org.mozilla.firefox', 'org.mozilla.firefox.desktop', 'Geary', 'org.gnome.Geary', 'org.gnome.Geary.desktop', 'LibreOffice', 'org.libreoffice.LibreOffice.startcenter', 'org.libreoffice.LibreOffice.desktop']"
+
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/nautilus/list-view/default-column-order "['name', 'size', 'type', 'owner', 'group', 'permissions', 'where', 'date_modified', 'date_modified_with_time', 'date_accessed', 'recency', 'starred', 'detailed_type']"
+  
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/privacy/remove-old-temp-files true
+
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/session/idle-delay uint32 0
+
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/interface/gtk-theme "'Materia'"
+
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/user-theme/name "'Materia-dark'"
+
+sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gsettings set org.gnome.shell.extensions.user-theme name "Materia"
+
+rm -rf  /usr/local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
+
+rm -rf ${UHOME}/${_USERS}/.local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
 
 
 dconf update
