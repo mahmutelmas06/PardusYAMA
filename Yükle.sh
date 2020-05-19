@@ -1,17 +1,17 @@
 #!/bin/bash 
 
 #==============================================================================
-#                               PARDUS SON KULLANICI YAMASI
+# -------------------  PARDUS SON KULLANICI YAMASI ---------------------------
 #  Yazar         : MAHMUT ELMAS
 #  İndirme Linki : https://github.com/mahmutelmas06/PardusYAMA
 #  İletişim      : mahmutelmas06@gmail.com
-#  Sürüm         : 0.2
-#  Bağımlıkıklar : zenity ln
+#  Sürüm         : 0.3
+#  Bağımlıkıklar : zenity apt
 #  Lisans        : MIT - Diğer eklentilerin kendi lisansları bulunmaktadır
 #
 #==============================================================================
 #
-#  Tanım 
+#  ---------------------------  Tanım  ---------------------------
 #  Pardusta son kullanıcının işini kolaylaştırmak için ek özellikler ekler 
 #  -Masaüstü kısayol oluşturma
 #  -Uygulama kısayolu oluşturma
@@ -28,46 +28,51 @@
 
 
 
+
+
+
+
+
 ROOT_UID=0	                        		# Root Kimliği
 MAX_DELAY=20                        		# Şifre girmek için beklenecek süre
 
 
 if [ "$UID" -eq "$ROOT_UID" ]; then 		# Root yetkisi var mı diye kontrol et.
 
+#==============================================================================
+
+# command -v gnome-shell >/dev/null 2>&1 || { zenity --error --text="Sisteminiz Gnome Shell değildir."; exit 1; } 							  # Gnome Shell mi kontrol et. Değilse çıkış yap.
+# apt-get -y install zenity 
+
+dpkg --add-architecture i386            	# İ386 desteğini etkinleştir
+
+apt-get -y install flatpak                                                                  # ------------------------------
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo     # Flatpak desteğini etkinleştir
+flatpak remote-add --if-not-exists winepak https://dl.winepak.org/repo/winepak.flatpakrepo  # ------------------------------
+
+_USERS="$(awk -F'[/:]' '{if ($3 >= 1000 && $3 != 65534) print $1}' /etc/passwd)" # Kullanıcı listesini al
+RUSER_UID=$(id -u ${_USERS})
+UHOME="/home"
 
 #==============================================================================
 
 (
 echo "# Seçim bekleniyor." ; sleep 2  		# Zenity yükleme göstergesi başlangıç
 
-#==============================================================================
-
-
-# command -v gnome-shell >/dev/null 2>&1 || { zenity --error --text="Sisteminiz Gnome Shell değildir."; exit 1; } # Gnome Shell mi kontrol et. Değilse çıkış yap.
-# apt-get -y install zenity 
-
-
-#==============================================================================
-
-_USERS="$(eval getent passwd {$(awk '/^UID_MIN/ {print $2}' /etc/login.defs)..$(awk '/^UID_MAX/ {print $2}' /etc/login.defs)} | cut -d: -f1)" # Kullanıcı listesini al
-RUSER_UID=$(id -u ${_USERS})
-UHOME="/home"
-
-
-#==============================================================================
-
-
 action=$(zenity --list --checklist \
-	--height 350 --width 700 \
-	--title "İstediğiniz yamaları seçiniz. (Tamamını seçmeniz önerilir)" \
-	--column "Seçim" 	--column "Yapılacak işlem" \
-			  TRUE 				  "Bazı önyüklü uygulamaları kaldır" \
-			  TRUE 				  "Sık kullanılan uygulamaları yükle ve Sistemi Güncelleştir" \
-			  TRUE 				  "Sağ Tık / Yeni menüsünü ekle" \
-			  TRUE 				  "Betikler menüsünü ekle" \
-			  TRUE 				  "Gnome eklentilerini yükle ve sistem ince ayarlarını yap" \
-			  TRUE 				  "Ücretsiz Windows fontlarını yükle" \
-			  TRUE 				  "Görsel ve Modern İşletim Sistemi Seçenekleri menüsünü yükle" \
+	--height 500 --width 950 \
+	--title "İstediğiniz Yamaları Seçiniz." \
+	--column "Seçim" 	--column "Yapılacak işlem" 													--column "Açıklama" \
+			  TRUE 				  "Benzer işleri yapan uygulamaları kaldır" 								 " " \
+			  TRUE 				  "Sistemi güncelleştir ve sık  kullanılan uygulamaları yükle" 				 " " \
+			  TRUE 				  "Java yükle" 																 "OPENJDK 11 JRE" \
+			  TRUE 				  "Wine yükle" 																 "Windows yazılımlarını Pardus'ta çalıştırmak için gereklidir" \
+			  TRUE 				  "Samba yükle ve yapılandır" 												 "Yerel ağda dosya ve yazıcı paylaşımı yapabilmek için gereklidir" \
+			  TRUE 				  "Şablonları yükle" 														 "Sağ Tık \Yeni menüsüne Yeni Belge, Yeni Sunum gibi seçenekler ekler" \
+			  TRUE 				  "Betikler menüsünü ekle" 													 "Sağ Tık \Betikler menüsüne Masaüstüne Kısayol Oluştur gibi seçenekler ekler" \
+			  TRUE 				  "Gnome eklentilerini yükle ve sistem ince ayarlarını yap" 				 " " \
+			  TRUE 				  "Fontlar yükle"															 "Ücretsiz Temel Windows fontlarını yükler" \
+			  TRUE 				  "Grub teması yükle"														 "İşletim Sistemi Seçenekleri menüsünü görsel ve modern bir hale getirir" \
 	--separator=":")
 	
 
@@ -83,56 +88,64 @@ case $word in
 #==============================================================================
 
 
-"Bazı"*)              						# Bazı uygulamaların kaldırılması ============================================
+"Benzer"*)              					# Bazı uygulamaların kaldırılması ============================================
 echo "5"
-echo "# Bazı uygulamalar sistemden kaldırılıyor." ; sleep 2
+echo "# Benzer işleri yapan uygulamalar sistemden kaldırılıyor." ; sleep 2
 
 apt-get -y remove gdebi						# Pardus Paket Yükleyici adı altında bir Gdebi kopyası zaten yüklü
-apt-get -y remove gimp              		# Pinta zaten yüklü. İhtiyaç duyan Gimp yükleyebilir.
+apt-get -y remove gimp              		# Son kullanıcı için Pinta zaten yüklü. İhtiyaç duyan grafikçiler Gimp yükleyebilir.
 apt-get -y remove vlc						# Totem silinemediği için Vlc silindi. Sistemde 2 adet aynı işi yapan uygulamayı bulundurmamak amacıyla
+apt-get -y remove synaptic					# Gnome paketler ile aynı paketleri listeliyor. Gnome paketler bağımlılıktan dolayı kaldırılamıyor. O yüzden bunu kaldırıyoruz. İhtiyaç duyan yükleyebilir. Benzer işi yapan 2 uygulama istemiyoruz.
 
-# Buraya ayrıca sistem önbelleği/ gereksiz dosyaları temizleme kodları eklenecek
+
 
 ;;
-
-"Sık"*)  # Sık kullanjılan bazı uygulamaların yüklenmesi ==================================================================
+"Sistemi"*)  		# Sık kullanjılan bazı uygulamaların yüklenmesi ==================================================================
 
 echo "15"
-echo "# Sistem güncelleniyor." ; sleep 2
+echo "# Sistem güncelleştiriliyor." ; sleep 2
 
 apt-get update && apt-get -y upgrade && apt-get -y dist-upgrade								# Sistemi GÜncelleştir
 
 echo "20"
 echo "# Sık kullanılan uygulamalar yükleniyor." ; sleep 2
 
+
+apt-get -y install icoutils
+apt-get -y install gir1.2-flatpak-1.0
+
 dpkg -R --install ./Yazılımlar/
 apt-get -fy install
 
 apt-get -y install chrome-gnome-shell		# Gnome eklentileri tarayıcı eklentisini yükle
 
-dpkg --add-architecture i386            	# İ386 desteğini etkinleştir
-
 apt-get -y install python3-pip          	# Pip komutunu kullanabilmek için gerekli kütüphane
 
-apt-get -y install git
+apt-get -y install git						# ------------- Github, Bitbuckets, Gitlab gibi sistemleri kullanabilmek için -------------------------
+apt-get -y install meson					
+apt-get -y install sassc					
 
-apt-get -y install flatpak                                                                  # ------------------------------
-flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo     # Flatpak desteğini etkinleştir
-flatpak remote-add --if-not-exists winepak https://dl.winepak.org/repo/winepak.flatpakrepo  # ------------------------------
-
-apt-get -y install ffmpeg					# Video indirme ve düzenleme programları için gerekli uygulamayı yükle
-apt-get -y install imagemagick				# Resim indirme ve düzenleme programları için gerekli uygulamayı yükle
-
-apt-get -y install icoutils
-apt-get -y install gir1.2-flatpak-1.0
+apt-get -y install ffmpeg					#------------- Video ve resim indirme ve düzenleme programları için gerekli uygulamayı yükle ----------
+apt-get -y install imagemagick				
 
 
-# Wine yükleniyor ve yapılandırılıyor
-echo "33"
+
+;;
+"Java"*)  		# Java Yüklemesi ==================================================================
+
+echo "25"
+echo "# Java yükleniyor." ; sleep 2
+
+apt-get -y install openjdk-11-jre
+
+
+;;
+"Wine"*)  		# Wine Yüklemesi ==================================================================
+
+echo "30"
 echo "# Wine yükleniyor ve yapılandırılıyor." ; sleep 2
 
-apt-get -y install wine
-apt-get -y install winetricks
+apt-get -y install wine winetricks
 winetricks -q directx9 vcrun2005 vcrun2008 vcrun2010 vcrun2003 vcrun2015 vcrun2017 vcrun6sp6
 
 
@@ -149,17 +162,9 @@ flatpak install -y flathub org.gnome.Lollypop
 apt-get -y purge libreoffice
 flatpak install -y flathub org.libreoffice.LibreOffice
 
-# Sekmeli görüntü aktifleştirilecek
-# Yeni simge paketi yüklenecek
+#  apt-get -y remove firefox-esr						# Firefox silinince Chromium yükleniyor. Sistemsel bir önlem. O yüzden şimdilik burda dursun
+# flatpak install -y flathub org.mozilla.firefox
 
-
-# Firefox yükle ve ayarlarını yap
-
-apt-get -y remove firefox-esr
-flatpak install -y flathub org.mozilla.firefox
-
-
-#============================================================================== Bunlar bir köşede dursun userpref.js
 #user_pref("browser.startup.homepage", "https://vuhuv.com.tr/");
 #user_pref("app.shield.optoutstudies.enabled", false);
 #user_pref("browser.download.useDownloadDir", false);
@@ -185,6 +190,37 @@ flatpak install -y flathub org.mozilla.firefox
 #user_pref("privacy.donottrackheader.enabled", true);
 #user_pref("toolkit.telemetry.cachedClientID", "c0ffeec0-ffee-c0ff-eec0-ffeec0ffeec0");
 
+
+;;
+"Samba"*)  		# Samba Yüklemesi ==================================================================
+
+echo "37"
+echo "# Samba kurulup kullanıma hazır hale gelmesi için ayarları yapılıyor." ; sleep 2
+
+apt-get -y install samba smbclient winbind libpam-winbind libnss-winbind samba-vfs-modules samba-common libcups2 cups cifs-utils
+apt-get -y install nautilus-share
+
+groupadd smbgrp
+
+for u in ${_USERS} 
+do
+
+usermod ${u} -aG smbgrp
+mv /etc/samba/smb.conf /etc/samba/defsmb.conf
+cp -r ./smb.conf /etc/samba/
+find "/var/lib/samba/usershares" -type f -exec chmod 777 {} \+ # Samba izinleri. Şimdilik böyle. Alternatif çözüm üretilince değiştilecek.
+chown $(id -un ${u}):$(id -gn ${u}) "/var/lib/samba/usershares"
+
+
+done
+
+systemctl restart smbd.service
+
+nautilus -q
+
+
+
+
 echo "39"
 echo "# Kalıntılar temizleniyor." ; sleep 2
 
@@ -193,12 +229,9 @@ apt-get -y autoremove																		# Kalıntıları sil
 
 
 ;;
-
-
-
-"Sağ"*)  # Şablonları Yükle ============================================================================================
+"Şablonları"*)  # Şablonları Yükle ============================================================================================
 echo "45"
-echo "# Şablonlar oluşturuluyor." ; sleep 2
+echo "# Şablonlar oluşturuluyor. (Sağ Tık/Yeni belge)" ; sleep 2
 
 SAB="Şablonlar"
 CONF=".config"
@@ -229,7 +262,6 @@ do
    for f in $_FILESS
    do
     
-
        cp -r "${f}" "$_dir/${SAB}" #  Şablonları kopyala
 
        find "$_dir/${SAB}/" -type f -exec chmod 777 {} \+ # Şablon izinleri
@@ -243,10 +275,9 @@ done
 
 
 ;;
-
 "Betikler"*)  # Betikleri Yükle ============================================================================================
 echo "50"
-echo "# Betikler yükleniyor." ; sleep 2
+echo "# Betikler yükleniyor. Sağ Tık/ Betikler" ; sleep 2
 
 
 BET=".local/share/nautilus/scripts"               
@@ -271,7 +302,6 @@ done
 done
 
 ;;
-
 "Gnome"*)  # GNOME EKLENTİLERİNİ Yükle ==============================================================================
 echo "55"
 echo "# Gnome eklentileri yükleniyor." ; sleep 2
@@ -289,14 +319,13 @@ do
     
 
        cp -r "${f}" "$_dir/${GNM}" #  Dosyaları kopyala
-       cp -r "${f}" "/usr/share/gnome-shell/extensions" #  Dosyaları sistem dizinine kopyala
+ #     cp -r "${f}" "/usr/share/gnome-shell/extensions" #  Dosyaları sistem dizinine kopyala
 
        find "$_dir/${GNM}/" -type f -exec chmod 777 {} \+ # Eklenti izinleri
-       find "/usr/share/gnome-shell/extensions" -type f -exec chmod 777 {} \+ # Sistem eklenti izinleri
+ #     find "/usr/share/gnome-shell/extensions" -type f -exec chmod 777 {} \+ # Sistem eklenti izinleri
        
        chown $(id -un $u):$(id -gn $u) "$_dir/${GNM}/"
 
-done
 done
 
 
@@ -307,121 +336,124 @@ echo "# Sistem ince ayarları yapılıyor." ; sleep 2
 
 
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e arc-menu@linxgem33.com
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e arc-menu@linxgem33.com
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e arc-menu@linxgem33.com
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e arc-menu@linxgem33.com
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/nautilus/preferences/executable-text-activation "'ask'"
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/nautilus/preferences/executable-text-activation "'ask'"
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/nautilus/preferences/show-create-link true
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/nautilus/preferences/show-create-link true
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/nautilus/icon-view/captions "['size', 'none', 'none']"
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/nautilus/icon-view/captions "['size', 'none', 'none']"
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/background/show-desktop-icons true
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/background/show-desktop-icons true
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/sound/allow-volume-above-100-percent true
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/sound/allow-volume-above-100-percent true
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/login-screen/disable-restart-buttons false
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/login-screen/disable-restart-buttons false
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/apt-update-indicator/autoremovable-packages false
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/apt-update-indicator/autoremovable-packages false
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/apt-update-indicator/new-packages false
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/apt-update-indicator/new-packages false
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/apt-update-indicator/obsolete-packages false
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/apt-update-indicator/obsolete-packages false
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/apt-update-indicator/residual-packages false
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/apt-update-indicator/residual-packages false
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/arc-menu/show-external-devices true
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/arc-menu/show-external-devices true
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/arc-menu/menu-button-icon "'Start_Box'"
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/arc-menu/menu-button-icon "'Start_Box'"
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/arc-menu/enable-sub-menus true
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/arc-menu/enable-sub-menus true
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/arc-menu/enable-pinned-apps false
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/arc-menu/enable-pinned-apps false
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/wm/keybindings/panel-main-menu "['Super_R']"
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/wm/keybindings/panel-main-menu "['Super_R']"
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/dash-to-panel/show-appmenu false
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/dash-to-panel/show-appmenu false
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/laine/merge-controls true
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/laine/merge-controls true
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/lockkeys/style "'show-hide'"
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/lockkeys/style "'show-hide'"
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/window-switcher/app-icon-mode "'both'"
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/lockkeys/notification-preferences "'on'"
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e add-on-desktop@maestroschan.fr
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/window-switcher/app-icon-mode "'both'"
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e appfolders-manager@maestroschan.fr
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e add-on-desktop@maestroschan.fr
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e applications-overview-tooltip@RaphaelRochet
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e appfolders-manager@maestroschan.fr
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e custom-hot-corners@janrunx.gmail.com
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e applications-overview-tooltip@RaphaelRochet
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -d clipboard-indicator@tudmotu.com
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e custom-hot-corners@janrunx.gmail.com
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e ding@rastersoft.com
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -d clipboard-indicator@tudmotu.com
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -d gnome-shell-screenshot@ttll.de
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e ding@rastersoft.com
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e gsconnect@andyholmes.github.io
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -d gnome-shell-screenshot@ttll.de
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e laine@knasher.gmail.com
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e gsconnect@andyholmes.github.io
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e lockkeys@vaina.lt
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e laine@knasher.gmail.com
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e noannoyance@daase.net
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e lockkeys@vaina.lt
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e soft-brightness@fifi.org
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e noannoyance@daase.net
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e update-extensions@franglais125.gmail.com
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e soft-brightness@fifi.org
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e alternate-tab@gnome-shell-extensions.gcampax.github.com
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e update-extensions@franglais125.gmail.com
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e user-theme@gnome-shell-extensions.gcampax.github.com
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e alternate-tab@gnome-shell-extensions.gcampax.github.com
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -d apps-menu@gnome-shell-extensions.gcampax.github.com
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e user-theme@gnome-shell-extensions.gcampax.github.com
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -d drive-menu@gnome-shell-extensions.gcampax.github.com
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -d apps-menu@gnome-shell-extensions.gcampax.github.com
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -d places-menu@gnome-shell-extensions.gcampax.github.com
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -d drive-menu@gnome-shell-extensions.gcampax.github.com
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -d window-list@gnome-shell-extensions.gcampax.github.com
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -d places-menu@gnome-shell-extensions.gcampax.github.com
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/nautilus/list-view/use-tree-view true
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -d window-list@gnome-shell-extensions.gcampax.github.com
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/nautilus/list-view/use-tree-view true
   
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/mutter/overlay-key 'Super_L'
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/mutter/overlay-key 'Super_L'
   
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/arc-menu/application-shortcuts-list "[['Pardus Mağaza', '/usr/share/pardus/pardus-store/icon.svg', 'pardus-store.desktop'], ['Terminal', 'utilities-terminal-symbolic', 'gnome-terminal'], ['Activities Overview', 'view-fullscreen-symbolic', 'ArcMenu_ActivitiesOverview']]"
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/arc-menu/application-shortcuts-list "[['Pardus Mağaza', '/usr/share/pardus/pardus-store/icon.svg', 'pardus-store.desktop'], ['Terminal', 'utilities-terminal-symbolic', 'gnome-terminal'], ['Activities Overview', 'view-fullscreen-symbolic', 'ArcMenu_ActivitiesOverview']]"
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/arc-menu/directory-shortcuts-list "[['Ev', 'user-home-symbolic', 'ArcMenu_Home'], ['İndirilenler', '. GThemedIcon folder-download-symbolic folder-symbolic folder-download folder', 'ArcMenu_Downloads'], ['Bilgisayar', 'drive-harddisk-symbolic', 'ArcMenu_Computer'], ['Ağ', 'network-workgroup-symbolic', 'ArcMenu_Network']]"
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/arc-menu/directory-shortcuts-list "[['Ev', 'user-home-symbolic', 'ArcMenu_Home'], ['İndirilenler', '. GThemedIcon folder-download-symbolic folder-symbolic folder-download folder', 'ArcMenu_Downloads'], ['Bilgisayar', 'drive-harddisk-symbolic', 'ArcMenu_Computer'], ['Ağ', 'network-workgroup-symbolic', 'ArcMenu_Network']]"
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/arc-menu/pinned-app-list "['Terminal', 'utilities-terminal', 'org.gnome.Terminal.desktop', 'Pardus Flatpak GUI', 'applications-system', 'tr.org.pardus.pardus_flatpak_gui.desktop', 'Pardus Mağaza', '/usr/share/pardus/pardus-store/icon.svg', 'pardus-store.desktop', 'Firefox', 'org.mozilla.firefox', 'org.mozilla.firefox.desktop', 'Geary', 'org.gnome.Geary', 'org.gnome.Geary.desktop', 'LibreOffice', 'org.libreoffice.LibreOffice.startcenter', 'org.libreoffice.LibreOffice.desktop']"
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/arc-menu/pinned-app-list "['Terminal', 'utilities-terminal', 'org.gnome.Terminal.desktop', 'Pardus Flatpak GUI', 'applications-system', 'tr.org.pardus.pardus_flatpak_gui.desktop', 'Pardus Mağaza', '/usr/share/pardus/pardus-store/icon.svg', 'pardus-store.desktop', 'Firefox', 'org.mozilla.firefox', 'org.mozilla.firefox.desktop', 'Geary', 'org.gnome.Geary', 'org.gnome.Geary.desktop', 'LibreOffice', 'org.libreoffice.LibreOffice.startcenter', 'org.libreoffice.LibreOffice.desktop']"
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/nautilus/list-view/default-column-order "['name', 'size', 'type', 'owner', 'group', 'permissions', 'where', 'date_modified', 'date_modified_with_time', 'date_accessed', 'recency', 'starred', 'detailed_type']"
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/nautilus/list-view/default-column-order "['name', 'size', 'type', 'owner', 'group', 'permissions', 'where', 'date_modified', 'date_modified_with_time', 'date_accessed', 'recency', 'starred', 'detailed_type']"
   
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/privacy/remove-old-temp-files true
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/privacy/remove-old-temp-files true
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/session/idle-delay uint32 0
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/session/idle-delay uint32 "0"
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/interface/gtk-theme "'Materia'"
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/interface/gtk-theme "'Materia'"
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/user-theme/name "'Materia-dark'"
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/user-theme/name "'Materia-dark'"
 
-sudo -u ${_USERS} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gsettings set org.gnome.shell.extensions.user-theme name "Materia"
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gsettings set org.gnome.shell.extensions.user-theme name "Materia"
 
 rm -rf  /usr/local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
 
-rm -rf ${UHOME}/${_USERS}/.local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
+rm -rf ${UHOME}/${u}/.local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
+
 
 
 dconf update
 
-
+done
 
 
 
 ;;
-"Ücretsiz"*)  #  Temel Microsoft ücretsiz fontları yükleme =========================================================
+"Fontlar"*)  #  Temel Microsoft ücretsiz fontları yükleme =========================================================
 echo "70"
 echo "# Windows fontları yükleniyor." ; sleep 2
 
@@ -443,9 +475,9 @@ echo "# Windows fontları yükleniyor." ; sleep 2
 
 ;;
 
-"Görsel"*)  # Grub2 Tema Yükleme  =====================================================================================
+"Grub"*)  # Grub2 Tema Yükleme  =====================================================================================
 echo "90"
-echo "# Yeni Grub teması yükleniyor." ; sleep 2
+echo "# Yeni Grub teması yükleniyor. (İşletim Sistemi Seçenekleri menüsü)" ; sleep 2
 
 THEME_DIR="/usr/share/grub/themes"
 THEME_NAME=tela
@@ -497,7 +529,7 @@ zenity --progress \
   --percentage=0 \
   --pulsate
 
-(( $? != 0 )) && zenity --error --text="Error in zenity command."
+(( $? != 0 )) && zenity --error --text="Hata! İşlem iptal edildi."
 
 exit 0
 
