@@ -3,14 +3,10 @@ Son Kullanıcı için eklenmiş Pardus Özelliklerini içerir
 
 ![](https://forum.pardus.org.tr/uploads/default/original/2X/a/a45430a672e21f0cb3be202fc6439b4bfd31d6c3.png)
 
-Şu an çok erken sürümdür. Oldukça hatalı olabilir.
 
 
-Yapılacaklar Listesi
-- Sürücü Yükleme Yazılımı
+- Sürücü Yükleme Yazılımı > https://github.com/mahmutelmas06/Nvidia-Surucu-Yukleyici
 - Flatpak, Snap ve Appimage için tek tıkla yükleyici-kaldırıcı
-- Sistemdeki yazılımların Temalandırılarak ile sisteme yakışır hale getirilmesi.
-- Sambayı yükleme ve kullanılması için ön ayarlarının yapılması
 
 
 
@@ -34,23 +30,39 @@ Yapılanlar
 - Bazı diğer ince ayarlar yapıldı.
    - Kısayol Oluşturma Etkin
    - .Sh ve diğer dosyalar için Çalıştır ya da Göster sorması etkin
+- Samba dosya paylaşımı eklendi
+- Wine Yüklemesi eklendi
+- Java yüklemesi eklendi
 
 
 Seçim Ekranı
-![](https://forum.pardus.org.tr/uploads/default/optimized/2X/6/6656bd35a073b223f906ff38eabaa40d22bc4165_2_517x281.png)
+
+![](https://forum.pardus.org.tr/uploads/default/original/2X/0/08b9b6e9a1cfb05e88bcec284c4a49d927e6fb6e.png)
 
 Grub Menüsü
+
 ![](https://forum.pardus.org.tr/uploads/default/optimized/2X/d/d16e01d25fcf440dc61d5a33c907047c1d88581a_2_517x290.png)
 
 Sağ Tık Menüsü
+
 ![](https://forum.pardus.org.tr/uploads/default/original/2X/1/1f01083589ceb6ef752743591900a532b958f8fb.png)
 
 Arc Menü eklenip, yerler ve uygulamalar düğmeleri gizlendi
+
 ![](https://forum.pardus.org.tr/uploads/default/original/2X/a/a0210923021d13be3bfc15e26ef69db647dba56a.png)
 
 Betikler Menüsü
+
 ![](https://forum.pardus.org.tr/uploads/default/optimized/2X/6/62175cd6198c357a5ce3ddce0ad6cbff0c94435d_2_690x401.png)
 
 Yeni Materia teması
+
 ![](https://forum.pardus.org.tr/uploads/default/optimized/2X/0/0ee53bedd9ecca5c4a0a7c00e4f53a0bbd3b0757_2_690x451.png)
+
+Samba Paylaşımı
+
+![](https://forum.pardus.org.tr/uploads/default/optimized/2X/d/d8402250ad02412a3d41fcc7cb1fdd0f2d17a9aa_2_467x375.png)
+
+![](https://forum.pardus.org.tr/uploads/default/original/2X/f/f88656e61f244d179c524c6054240c2c6c4a61ee.png)
+
  
