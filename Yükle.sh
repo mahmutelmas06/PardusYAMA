@@ -60,17 +60,16 @@ UHOME="/home"
 echo "# Seçim bekleniyor." ; sleep 2  		# Zenity yükleme göstergesi başlangıç
 
 action=$(zenity --list --checklist \
-	--height 500 --width 950 \
+	--height 500 --width 975 \
 	--title "İstediğiniz Yamaları Seçiniz." \
 	--column "Seçim" 	--column "Yapılacak işlem" 													--column "Açıklama" \
 			  TRUE 				  "Benzer işleri yapan uygulamaları kaldır" 								 " " \
-			  TRUE 				  "Sistemi güncelleştir ve sık  kullanılan uygulamaları yükle" 				 " " \
-			  TRUE 				  "Java yükle" 																 "OPENJDK 11 JRE" \
-			  TRUE 				  "Wine yükle" 																 "Windows yazılımlarını Pardus'ta çalıştırmak için gereklidir" \
+			  TRUE 				  "Sistemi güncelleştir ve Sık  Kullanılan uygulamaları yükle" 				 " " \
+			  TRUE 				  "Oyuncu araçlarını yükle" 												 "Steam ve Lutris yüklenerek gerekli ayarlar yapılır" \
+			  TRUE 				  "Wine yükle" 																 "Windows yazılımlarını Pardus'ta çalıştırabilmek için gereklidir" \
 			  TRUE 				  "Samba yükle ve yapılandır" 												 "Yerel ağda dosya ve yazıcı paylaşımı yapabilmek için gereklidir" \
-			  TRUE 				  "Şablonları yükle" 														 "Sağ Tık \Yeni menüsüne Yeni Belge, Yeni Sunum gibi seçenekler ekler" \
-			  TRUE 				  "Betikler menüsünü ekle" 													 "Sağ Tık \Betikler menüsüne Masaüstüne Kısayol Oluştur gibi seçenekler ekler" \
-			  TRUE 				  "Gnome eklentilerini yükle ve sistem ince ayarlarını yap" 				 " " \
+			  TRUE 				  "Betikleri ve Şablonları yükle" 											 "Sağ Tık menüsüne Yeni Belge, Masaüstü Kısayolu oluştur gibi seçenekler ekler" \
+			  TRUE 				  "Gnome eklentilerini yükle ve sistem ince ayarlarını yap" 				 "Bilgisyarınıza yeni özellikler ekler" \
 			  TRUE 				  "Fontlar yükle"															 "Ücretsiz Temel Windows fontlarını yükler" \
 			  TRUE 				  "Grub teması yükle"														 "İşletim Sistemi Seçenekleri menüsünü görsel ve modern bir hale getirir" \
 	--separator=":")
@@ -100,59 +99,49 @@ apt-get -y remove synaptic					# Gnome paketler ile aynı paketleri listeliyor. 
 
 
 ;;
-"Sistemi"*)  		# Sık kullanjılan bazı uygulamaların yüklenmesi ==================================================================
+"Sistemi"*)  								# Sık kullanılan bazı uygulamaların yüklenmesi ===============================
 
 echo "15"
 echo "# Sistem güncelleştiriliyor." ; sleep 2
 
-apt-get update && apt-get -y upgrade && apt-get -y dist-upgrade								# Sistemi GÜncelleştir
+apt-get update && apt-get -y upgrade && apt-get -y dist-upgrade
 
 echo "20"
 echo "# Sık kullanılan uygulamalar yükleniyor." ; sleep 2
 
 
-apt-get -y install icoutils
-apt-get -y install gir1.2-flatpak-1.0
-
-dpkg -R --install ./Yazılımlar/
-apt-get -fy install
+apt-get -y install liblnk1 icoutils gir1.2-flatpak-1.0
 
 apt-get -y install chrome-gnome-shell		# Gnome eklentileri tarayıcı eklentisini yükle
 
 apt-get -y install python3-pip          	# Pip komutunu kullanabilmek için gerekli kütüphane
 
-apt-get -y install git						# ------------- Github, Bitbuckets, Gitlab gibi sistemleri kullanabilmek için -------------------------
+apt-get -y install git						# ------------ Github, Bitbuckets, Gitlab gibi sistemleri kullanabilmek için -------------------------
 apt-get -y install meson					
 apt-get -y install sassc					
 
-apt-get -y install ffmpeg					#------------- Video ve resim indirme ve düzenleme programları için gerekli uygulamayı yükle ----------
+apt-get -y install ffmpeg					#------------- Video ve resim indirme ve düzenleme programları için gerekli uygulamaları yükle --------
 apt-get -y install imagemagick				
 
-
-
-;;
-"Java"*)  		# Java Yüklemesi ==================================================================
-
-echo "25"
-echo "# Java yükleniyor." ; sleep 2
-
+echo "# Açık Kaynak Java yükleniyor." ; sleep 2
 apt-get -y install openjdk-11-jre
 
+echo "# Yerel yazılımlar yükleniyor." ; sleep 2
+dpkg -R --install ./Yazılımlar/
+apt-get -fy install
 
-;;
-"Wine"*)  		# Wine Yüklemesi ==================================================================
+
 
 echo "30"
-echo "# Wine yükleniyor ve yapılandırılıyor." ; sleep 2
+echo "# Kalıntılar temizleniyor." ; sleep 2
 
-apt-get -y install wine winetricks
-winetricks -q directx9 vcrun2005 vcrun2008 vcrun2010 vcrun2003 vcrun2015 vcrun2017 vcrun6sp6
+apt-get -y autoremove																		# Kalıntıları sil
 
 
-# Uygulamaların Flatpak sürümleriyle değiştirilmesi
+# --------------------------------------------------------- Uygulamaların Flatpak sürümleriyle değiştirilmesi -------------------------------------
 
 echo "35"
-echo "# Bazı yazılımlar Flatpak sürümleri ile değiştirilip güncelleştiriliyor." ; sleep 2
+echo "# Bazı yazılımlar Flatpak sürümleri ile değiştirilip güncelleştiriliyor.\n \nBu işlem internet hızınıza göre biraz zaman alabilir." ; sleep 2
 
 apt-get -y remove thunderbird
 flatpak install flathub org.gnome.Geary
@@ -162,7 +151,7 @@ flatpak install -y flathub org.gnome.Lollypop
 apt-get -y purge libreoffice
 flatpak install -y flathub org.libreoffice.LibreOffice
 
-#  apt-get -y remove firefox-esr						# Firefox silinince Chromium yükleniyor. Sistemsel bir önlem. O yüzden şimdilik burda dursun
+# apt-get -y remove firefox-esr				# Firefox silinince Chromium yükleniyor. Sistemsel bir önlem. O yüzden şimdilik burda dursun
 # flatpak install -y flathub org.mozilla.firefox
 
 #user_pref("browser.startup.homepage", "https://vuhuv.com.tr/");
@@ -189,6 +178,46 @@ flatpak install -y flathub org.libreoffice.LibreOffice
 #ser_pref("pref.general.disable_button.default_browser", false);
 #user_pref("privacy.donottrackheader.enabled", true);
 #user_pref("toolkit.telemetry.cachedClientID", "c0ffeec0-ffee-c0ff-eec0-ffeec0ffeec0");
+
+;;
+"Oyuncu"*)  		# Oyuncu araçları Yüklemesi ==================================================================
+
+echo "25"
+echo "# Oyuncu araçları yükleniyor." ; sleep 2
+
+# flatpak install flathub com.valvesoftware.Steam  #Flatpak runtime sürümü depoda eski, bu eski sürümde de Nvidia-Steam sorunlu. O yüzden deb sürümü yüklenecek. 
+
+cd ./Oyuncu
+wget https://steamcdn-a.akamaihd.net/client/installer/steam.deb 2>&1 | sed -u 's/.* \([0-9]\+%\)\ \+\([0-9.]\+.\) \(.*\)/\1\n# İndirme Hızı \2\/s, Kalan zaman \3/' | zenity --progress --title "İndirme İşlemi" --text "Steam indiriliyor..." --no-cancel --auto-close --pulsate
+chmod 777 steam*.deb
+cd ..
+dpkg -R --install ./Oyuncu/
+apt-get -fy install
+
+apt-get -y install libvulkan1 libvulkan1:i386 libvulkan-dev vulkan-utils libgl1:i386 mesa-vulkan-drivers libgl1-mesa-dri:i386 mesa-vulkan-drivers mesa-vulkan-drivers:i386
+
+#lutris --reinstall epic-games-store
+
+#lutris --reinstall battlenet
+apt-get install -y libgnutls30:i386 libldap-2.4-2:i386 libgpg-error0:i386 libsqlite3-0:i386
+
+#lutris --reinstall origin
+#lutris --reinstall gog-galaxy
+#lutris --reinstall rockstar-games-launcher
+
+
+;;
+"Wine"*)  		# Wine Yüklemesi ==================================================================
+
+echo "30"
+echo "# Wine yükleniyor ve yapılandırılıyor.\n \nİnternet hızınıza göre işlem uzayabilir.\n \nLütfen bekleyiniz..." ; sleep 2
+
+apt-get -y install wine winetricks mono-complete libgnutls30:i386 libldap-2.4-2:i386 libgpg-error0:i386 libxml2:i386 libasound2-plugins:i386 libsdl2-2.0-0:i386 libfreetype6:i386 libdbus-1-3:i386 libsqlite3-0:i386
+
+winetricks -q directx9 dotnet40 corefonts ie8 vcrun2005 vcrun2008 vcrun2010 vcrun2015 vcrun2017 vcrun6sp6 dxvk
+
+apt-get -y install libvulkan1 libvulkan1:i386 libvulkan-dev vulkan-utils mesa-vulkan-drivers libgl1-mesa-dri:i386 mesa-vulkan-drivers mesa-vulkan-drivers:i386
+
 
 
 ;;
@@ -219,22 +248,15 @@ systemctl restart smbd.service
 nautilus -q
 
 
-
-
-echo "39"
-echo "# Kalıntılar temizleniyor." ; sleep 2
-
-apt-get -y autoremove																		# Kalıntıları sil
-
-
-
 ;;
-"Şablonları"*)  # Şablonları Yükle ============================================================================================
+"Betikleri"*)  # Betikleri ve Şablonları Yükle ============================================================================================
 echo "45"
-echo "# Şablonlar oluşturuluyor. (Sağ Tık/Yeni belge)" ; sleep 2
+echo "# Sağ Tık menüsü geliştiriliyor..." ; sleep 2
 
-SAB="Şablonlar"
 CONF=".config"
+SAB="Şablonlar"
+BET=".local/share/nautilus/scripts"               
+_FILESB="./Betikler/*"	
 _FILESS="./Şablonlar/*"  
 
 for u in $_USERS
@@ -267,28 +289,10 @@ do
        find "$_dir/${SAB}/" -type f -exec chmod 777 {} \+ # Şablon izinleri
        
        chown $(id -un $u):$(id -gn $u) "$_dir/${SAB}/"
-
-done
-done
-  
-
-
-
-;;
-"Betikler"*)  # Betikleri Yükle ============================================================================================
-echo "50"
-echo "# Betikler yükleniyor. Sağ Tık/ Betikler" ; sleep 2
-
-
-BET=".local/share/nautilus/scripts"               
-_FILESB="./Betikler/*"	
-
-for u in $_USERS
-do
-
-  _dir="${UHOME}/${u}"
-
-   for f in $_FILESB
+       
+   done
+       
+          for f in $_FILESB
    do
     
 
@@ -300,6 +304,8 @@ do
 
 done
 done
+  
+
 
 ;;
 "Gnome"*)  # GNOME EKLENTİLERİNİ Yükle ==============================================================================
@@ -338,8 +344,6 @@ echo "# Sistem ince ayarları yapılıyor." ; sleep 2
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e arc-menu@linxgem33.com
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e arc-menu@linxgem33.com
-
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/nautilus/preferences/executable-text-activation "'ask'"
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/nautilus/preferences/show-create-link true
@@ -372,8 +376,6 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dco
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/dash-to-panel/show-appmenu false
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/laine/merge-controls true
-
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/lockkeys/style "'show-hide'"
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/lockkeys/notification-preferences "'on'"
@@ -395,8 +397,6 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gno
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -d gnome-shell-screenshot@ttll.de
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e gsconnect@andyholmes.github.io
-
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e laine@knasher.gmail.com
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e lockkeys@vaina.lt
 
@@ -438,9 +438,11 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dco
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gsettings set org.gnome.shell.extensions.user-theme name "'Materia-dark'"
 
-rm -rf  /usr/local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/dash-to-panel/trans-panel-opacity "0.60"
 
-rm -rf ${UHOME}/${u}/.local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
+sudo rm -rf  /usr/local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
+
+sudo rm -rf ${UHOME}/${u}/.local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
 
 
 
