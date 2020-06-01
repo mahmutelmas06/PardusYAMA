@@ -1,0 +1,16 @@
+[Desktop Entry]
+Version=1.0
+Name=Pardus Store
+Name[tr]=Pardus Mağaza
+Type=Application
+Comment=Simple Qt based application store
+Comment[tr]=Basit Qt tabanlı uygulama mağazası
+Terminal=false
+Exec=pkexec /usr/bin/pardus-store
+Icon=/usr/share/pardus/pardus-store/icon.svg
+MimeType=application/x-iso-image;
+Categories=Qt;Utility;
+Keywords=usb;disk;writer;burner;
+GenericName=Application Store
+GenericName[tr]=Uygulama Mağazası
+X-XFCE-Source=file:///usr/share/applications/pardus-store.desktop

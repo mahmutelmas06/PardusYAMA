@@ -5,7 +5,7 @@
 #  Yazar         : MAHMUT ELMAS
 #  İndirme Linki : https://github.com/mahmutelmas06/PardusYAMA
 #  İletişim      : mahmutelmas06@gmail.com
-#  Sürüm         : 0.3
+#  Sürüm         : 0.4
 #  Bağımlıkıklar : zenity apt
 #  Lisans        : MIT - Diğer eklentilerin kendi lisansları bulunmaktadır
 #
@@ -22,12 +22,9 @@
 #  -Grub teması değiştirildi
 #  -Sistem ve Yazılım Güncelleştirmelerinin yapılması
 #  -Bazı uygulamaların Flatpak sürümleri  ile değiştirilmesi   
-#  -Yükleme önizleme penceresinin eklenmesi
+#  
 #
 #==============================================================================
-
-
-
 
 
 
@@ -41,14 +38,21 @@ if [ "$UID" -eq "$ROOT_UID" ]; then 		# Root yetkisi var mı diye kontrol et.
 
 #==============================================================================
 
-# command -v gnome-shell >/dev/null 2>&1 || { zenity --error --text="Sisteminiz Gnome Shell değildir."; exit 1; } 							  # Gnome Shell mi kontrol et. Değilse çıkış yap.
-# apt-get -y install zenity 
+# Masaüstünü belirle GNOME, KDE veya XFCE
+desktop=$(echo "$XDG_DATA_DIRS" | sed 's/.*\(xfce\|kde\|gnome\).*/\1/')
+desktop=${desktop,,}  						# Küçük harflere dönüştür
+xfce=$xfce
+gnome=$gnome
+
+#==============================================================================
+
+
 
 dpkg --add-architecture i386            	# İ386 desteğini etkinleştir
 
-apt-get -y install flatpak                                                                  # ------------------------------
-flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo     # Flatpak desteğini etkinleştir
-flatpak remote-add --if-not-exists winepak https://dl.winepak.org/repo/winepak.flatpakrepo  # ------------------------------
+
+#==============================================================================
+
 
 _USERS="$(awk -F'[/:]' '{if ($3 >= 1000 && $3 != 65534) print $1}' /etc/passwd)" # Kullanıcı listesini al
 RUSER_UID=$(id -u ${_USERS})
@@ -56,8 +60,29 @@ UHOME="/home"
 
 #==============================================================================
 
-(
-echo "# Seçim bekleniyor." ; sleep 2  		# Zenity yükleme göstergesi başlangıç
+# apt-get -y install zenity
+#(
+#echo "# Seçim bekleniyor." ; sleep 2  		# Zenity yükleme göstergesi başlangıç
+
+if [[ $desktop = $xfce ]]; then
+
+action=$(zenity --list --checklist \
+	--height 500 --width 1000 \
+	--title "İstediğiniz Yamaları Seçiniz." \
+	--column "Seçim" 	--column "Yapılacak işlem" 													--column "Açıklama" \
+			  TRUE 				  "Benzer işleri yapan uygulamaları kaldır" 								 " " \
+			  TRUE 				  "Sistemi güncelleştir ve Sık  Kullanılan uygulamaları yükle" 				 " " \
+			  TRUE 				  "Oyuncu araçlarını yükle" 												 "Steam ve Lutris yüklenerek gerekli ayarlar yapılır" \
+			  TRUE 				  "Wine yükle" 																 "Windows yazılımlarını Pardus'ta çalıştırabilmek için gereklidir" \
+			  TRUE 				  "Samba yükle ve yapılandır" 												 "Yerel ağda dosya ve yazıcı paylaşımı yapabilmek için gereklidir" \
+			  TRUE 				  "Betikleri ve Şablonları yükle" 											 "Sağ Tık menüsüne Yeni Belge, Masaüstü Kısayolu oluştur gibi seçenekler ekler" \
+			  TRUE 				  "XFCE Ayarlarını yap"		 												 "XFCE arayüzünü daha modern bir hale getirir" \
+			  TRUE 				  "Fontlar yükle"															 "Ücretsiz Temel Windows fontlarını yükler" \
+			  TRUE 				  "Grub teması yükle"														 "İşletim Sistemi Seçenekleri menüsünü görsel ve modern bir hale getirir" \
+	--separator=":")
+
+
+else
 
 action=$(zenity --list --checklist \
 	--height 500 --width 975 \
@@ -73,12 +98,27 @@ action=$(zenity --list --checklist \
 			  TRUE 				  "Fontlar yükle"															 "Ücretsiz Temel Windows fontlarını yükler" \
 			  TRUE 				  "Grub teması yükle"														 "İşletim Sistemi Seçenekleri menüsünü görsel ve modern bir hale getirir" \
 	--separator=":")
-	
+fi
 
 if [ -z "$action" ] ; then
    echo "Seçim yapılmadı"
    exit 1
 fi
+
+
+
+#==============================================================================
+
+
+
+apt-get -y install flatpak                                                                  # ------------------------------
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo     # Flatpak desteğini etkinleştir
+flatpak remote-add --if-not-exists winepak https://dl.winepak.org/repo/winepak.flatpakrepo  # ------------------------------
+
+
+
+
+#==============================================================================
 
 
 IFS=":" ; for word in $action ; do   		#  Zenity checklist için çoklu seçim komutu başlat
@@ -93,10 +133,18 @@ echo "# Benzer işleri yapan uygulamalar sistemden kaldırılıyor." ; sleep 2
 
 apt-get -y remove gdebi						# Pardus Paket Yükleyici adı altında bir Gdebi kopyası zaten yüklü
 apt-get -y remove gimp              		# Son kullanıcı için Pinta zaten yüklü. İhtiyaç duyan grafikçiler Gimp yükleyebilir.
-apt-get -y remove vlc						# Totem silinemediği için Vlc silindi. Sistemde 2 adet aynı işi yapan uygulamayı bulundurmamak amacıyla
-apt-get -y remove synaptic					# Gnome paketler ile aynı paketleri listeliyor. Gnome paketler bağımlılıktan dolayı kaldırılamıyor. O yüzden bunu kaldırıyoruz. İhtiyaç duyan yükleyebilir. Benzer işi yapan 2 uygulama istemiyoruz.
+apt-get -y remove vlc						# Totemimiz vaaar.
 
+if [[ $desktop = $gnome ]]; then
+apt-get -y remove synaptic					# Gnome paketler ile aynı paketleri listeliyor. Gnome paketler bağımlılıktan ve güncelleme yardımcısından dolayı kaldırılamıyor. O yüzden bunu kaldırıyoruz. İhtiyaç duyan yükleyebilir. Benzer işi yapan 2 uygulama istemiyoruz.
+fi
 
+if [[ $desktop = $xfce ]]; then
+apt-get -y remove hddtemp xfce4-clipman deepin-deb-installer thunderbird gimp mousepad xfce4-notes ristretto xfce4-dict xfburn xfce4-sensors-plugin xfce4-appfinder
+apt-get -y install gedit
+flatpak install -y flathub org.gnome.Totem
+flatpak install -y flathub org.gnome.eog
+fi
 
 ;;
 "Sistemi"*)  								# Sık kullanılan bazı uygulamaların yüklenmesi ===============================
@@ -104,7 +152,7 @@ apt-get -y remove synaptic					# Gnome paketler ile aynı paketleri listeliyor. 
 echo "15"
 echo "# Sistem güncelleştiriliyor." ; sleep 2
 
-apt-get update && apt-get -y upgrade && apt-get -y dist-upgrade
+apt-get update && apt-get -y upgrade && apt-get -y dist-upgrade && apt-get -y full-upgrade
 
 echo "20"
 echo "# Sık kullanılan uygulamalar yükleniyor." ; sleep 2
@@ -112,19 +160,21 @@ echo "# Sık kullanılan uygulamalar yükleniyor." ; sleep 2
 
 apt-get -y install liblnk1 icoutils gir1.2-flatpak-1.0
 
+if [[ $desktop = $gnome ]]; then
 apt-get -y install chrome-gnome-shell		# Gnome eklentileri tarayıcı eklentisini yükle
+fi
 
 apt-get -y install python3-pip          	# Pip komutunu kullanabilmek için gerekli kütüphane
 
-apt-get -y install git						# ------------ Github, Bitbuckets, Gitlab gibi sistemleri kullanabilmek için -------------------------
-apt-get -y install meson					
-apt-get -y install sassc					
+apt-get -y install git						# Github, Bitbuckets, Gitlab gibi sistemleri kullanabilmek için
+		
+apt-get -y install gtk2-engines-murrine gtk2-engines-pixbuf ninja-build meson sassc
 
-apt-get -y install ffmpeg					#------------- Video ve resim indirme ve düzenleme programları için gerekli uygulamaları yükle --------
+apt-get -y install ffmpeg					# Video ve resim indirme ve düzenleme programları için gerekli uygulamaları yükle
 apt-get -y install imagemagick				
 
-echo "# Açık Kaynak Java yükleniyor." ; sleep 2
-apt-get -y install openjdk-11-jre
+# echo "# Açık Kaynak Java yükleniyor." ; sleep 2
+# apt-get -y install openjdk-11-jre
 
 echo "# Yerel yazılımlar yükleniyor." ; sleep 2
 dpkg -R --install ./Yazılımlar/
@@ -138,17 +188,15 @@ echo "# Kalıntılar temizleniyor." ; sleep 2
 apt-get -y autoremove																		# Kalıntıları sil
 
 
-# --------------------------------------------------------- Uygulamaların Flatpak sürümleriyle değiştirilmesi -------------------------------------
-
 echo "35"
 echo "# Bazı yazılımlar Flatpak sürümleri ile değiştirilip güncelleştiriliyor.\n \nBu işlem internet hızınıza göre biraz zaman alabilir." ; sleep 2
 
-apt-get -y remove thunderbird
-flatpak install flathub org.gnome.Geary
+apt-get -y remove thunderbird evolution
+flatpak install -y flathub org.gnome.Geary
 
 flatpak install -y flathub org.gnome.Lollypop
 
-apt-get -y purge libreoffice
+apt-get -y purge libreoffice*
 flatpak install -y flathub org.libreoffice.LibreOffice
 
 # apt-get -y remove firefox-esr				# Firefox silinince Chromium yükleniyor. Sistemsel bir önlem. O yüzden şimdilik burda dursun
@@ -226,8 +274,11 @@ apt-get -y install libvulkan1 libvulkan1:i386 libvulkan-dev vulkan-utils mesa-vu
 echo "37"
 echo "# Samba kurulup kullanıma hazır hale gelmesi için ayarları yapılıyor." ; sleep 2
 
-apt-get -y install samba smbclient winbind libpam-winbind libnss-winbind samba-vfs-modules samba-common libcups2 cups cifs-utils
+apt-get -y install samba smbclient winbind libpam-winbind libnss-winbind samba-vfs-modules samba-common libcups2 cups cifs-utils libpam-smbpass
+
+if [[ $desktop = $gnome ]]; then
 apt-get -y install nautilus-share
+fi
 
 groupadd smbgrp
 
@@ -244,8 +295,6 @@ chown $(id -un ${u}):$(id -gn ${u}) "/var/lib/samba/usershares"
 done
 
 systemctl restart smbd.service
-
-nautilus -q
 
 
 ;;
@@ -291,6 +340,8 @@ do
        chown $(id -un $u):$(id -gn $u) "$_dir/${SAB}/"
        
    done
+   
+   if [[ $desktop = $gnome ]]; then
        
           for f in $_FILESB
    do
@@ -301,19 +352,102 @@ do
        find "$_dir/${BET}/" -type f -exec chmod 777 {} \+ # Betik izinleri
        
        chown $(id -un $u):$(id -gn $u) "$_dir/${BET}/"
+      
 
 done
+fi
+
 done
   
+;;
+"XFCE"*)  # XFCE Ayarlarını yap =====================================================================================
 
+killall xfconfd
 
+CONF=".config"     
+_FILESX="./Xfce/*"  
+
+for u in $_USERS
+do
+
+  _dir="${UHOME}/${u}"
+  
+
+   for f in $_FILESX
+   do
+    
+       cp -r "${f}" "$_dir/${CONF}/" 
+
+       find "$_dir/${CONF}/" -type f -exec chmod 777 {} \+
+       
+       chown $(id -un $u):$(id -gn $u) "$_dir/${CONF}/"
+       
+   done
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /panels/panel-1/plugin-ids --create -t int -s 2 -t int -s 1 -t int -s 12 -t int -s 14 -t int -s 11 -t int -s 16 -t int -s 17 -t int -s 3 -t int -s 7 -t int -s 15 -t int -s 5 -t int -s 8 -t int -s 4 -t int -s 13
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /panels/panel-1/size -t int -s 44
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /panels/panel-1/leave-opacity -t int -s 80
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /panels/panel-1/enter-opacity -t int -s 90
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-16/items --create -a -s 15909264344.desktop
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-16 --create -t string -s launcher
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-14/items --create -a -s 15909264293.desktop
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-14 --create -t string -s launcher
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-12/items --create -a -s 15909264112.desktop
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-12 --create -t string -s launcher
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-11/items --create -a -s 15909263981.desktop
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-11 --create -t string -s launcher
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/theme -s Adapta-Blue
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/frame_opacity -s 94
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/inactive_opacity -s 96
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/title_font -s "Sans Bold 11"
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xsettings -p /Net/ThemeName -s Adapta-Blue
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-desktop -p /desktop-icons/icon-size -s 48
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-desktop -p /desktop-icons/file-icons/show-removable -s false
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-15/size-max -s 30
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-15/show-frame -s true
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c thunar -p /last-icon-view-zoom-level -s THUNAR_ZOOM_LEVEL_150_PERCENT
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c thunar -p /misc-thumbnail-mode -s THUNAR_THUMBNAIL_MODE_ALWAYS
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c thunar -p /misc-date-style -s THUNAR_DATE_STYLE_SHORT
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c thunar -p /shortcuts-icon-size -s THUNAR_ICON_SIZE_32
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c thunar -p /misc-middle-click-in-tab -s TRUE
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c thunar -p /misc-recursive-permissions -s THUNAR_RECURSIVE_PERMISSIONS_NEVER
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c thunar -p /actions/action-3/command -s "exo-open --launch WebBrowser www.vuhuv.com.tr/%s"
+
+done
 ;;
 "Gnome"*)  # GNOME EKLENTİLERİNİ Yükle ==============================================================================
 echo "55"
 echo "# Gnome eklentileri yükleniyor." ; sleep 2
 
 GNM=".local/share/gnome-shell/extensions" 		
-_FILESG="./GEklentiler/*"
+_FILESG="./Gnome/*"
 
 for u in $_USERS
 do
@@ -424,7 +558,7 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dco
   
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/arc-menu/application-shortcuts-list "[['Pardus Mağaza', '/usr/share/pardus/pardus-store/icon.svg', 'pardus-store.desktop'], ['Terminal', 'utilities-terminal-symbolic', 'gnome-terminal'], ['Activities Overview', 'view-fullscreen-symbolic', 'ArcMenu_ActivitiesOverview']]"
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/arc-menu/directory-shortcuts-list "[['Ev', 'user-home-symbolic', 'ArcMenu_Home'], ['İndirilenler', '. GThemedIcon folder-download-symbolic folder-symbolic folder-download folder', 'ArcMenu_Downloads'], ['Bilgisayar', 'drive-harddisk-symbolic', 'ArcMenu_Computer'], ['Ağ', 'network-workgroup-symbolic', 'ArcMenu_Network']]"
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/arc-menu/directory-shortcuts-list "[['Bilgisayar', 'drive-harddisk-symbolic', 'ArcMenu_Computer'], ['Ev', 'user-home-symbolic', 'ArcMenu_Home'], ['Ağ', 'network-workgroup-symbolic', 'ArcMenu_Network']]"
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/arc-menu/pinned-app-list "['Terminal', 'utilities-terminal', 'org.gnome.Terminal.desktop', 'Pardus Flatpak GUI', 'applications-system', 'tr.org.pardus.pardus_flatpak_gui.desktop', 'Pardus Mağaza', '/usr/share/pardus/pardus-store/icon.svg', 'pardus-store.desktop', 'Firefox', 'org.mozilla.firefox', 'org.mozilla.firefox.desktop', 'Geary', 'org.gnome.Geary', 'org.gnome.Geary.desktop', 'LibreOffice', 'org.libreoffice.LibreOffice.startcenter', 'org.libreoffice.LibreOffice.desktop']"
 
@@ -520,16 +654,16 @@ done   #  Zenity checklist için çoklu seçim komutu kapat
 
 notify-send -t 2000 -i /usr/share/icons/gnome/32x32/status/info.png "İşlem Tamamlanmıştır"
 
-echo "# Tamamlandı." ; sleep 2
-echo "100"
-) |
-zenity --progress \
-  --title="Yükleme İlerlemesi" \
-  --text="Yönetici yetkileri sağlanıyor." \
-  --percentage=0 \
-  --pulsate
+#echo "# Tamamlandı." ; sleep 2
+#echo "100"
+#) |
+#zenity --progress \
+#  --title="Yükleme İlerlemesi" \
+#  --text="Yönetici yetkileri sağlanıyor." \
+#  --percentage=2 \
+#  --pulsate
 
-(( $? != 0 )) && zenity --error --text="Hata! İşlem iptal edildi."
+#(( $? != 0 )) && zenity --error --text="Hata! İşlem iptal edildi."
 
 exit 0
 

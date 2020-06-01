@@ -1,0 +1,86 @@
+favorites=xfce-settings-manager.desktop,exo-web-browser.desktop,exo-terminal-emulator.desktop,pardus-store.desktop,xfce4-screenshooter.desktop,galculator.desktop,libreoffice-startcenter.desktop,pinta.desktop
+recent=xfce4-settings-editor.desktop,xfce4-about.desktop,xfce-backdrop-settings.desktop,xfce4-terminal-settings.desktop,xfce-settings-manager.desktop,exo-web-browser.desktop,xsane.desktop,eog.desktop
+button-title=Pardus
+button-icon=emblem-pardus
+button-single-row=true
+show-button-title=false
+show-button-icon=true
+launcher-show-name=true
+launcher-show-description=false
+launcher-show-tooltip=true
+item-icon-size=3
+hover-switch-category=true
+category-show-name=true
+category-icon-size=0
+load-hierarchy=true
+recent-items-max=8
+favorites-in-recent=false
+display-recent-default=false
+position-search-alternate=true
+position-commands-alternate=false
+position-categories-alternate=true
+stay-on-focus-out=false
+confirm-session-command=true
+menu-width=447
+menu-height=641
+menu-opacity=90
+command-settings=xfce4-settings-manager
+show-command-settings=false
+command-lockscreen=xflock4
+show-command-lockscreen=true
+command-switchuser=dm-tool switch-to-greeter
+show-command-switchuser=true
+command-logoutuser=xfce4-session-logout --logout --fast
+show-command-logoutuser=false
+command-restart=xfce4-session-logout --reboot --fast
+show-command-restart=false
+command-shutdown=xfce4-session-logout --halt --fast
+show-command-shutdown=false
+command-suspend=xfce4-session-logout --suspend
+show-command-suspend=false
+command-hibernate=xfce4-session-logout --hibernate
+show-command-hibernate=false
+command-logout=xfce4-session-logout
+show-command-logout=true
+command-menueditor=menulibre
+show-command-menueditor=false
+command-profile=mugshot
+show-command-profile=true
+search-actions=6
+
+[action0]
+name=Man Sayfaları
+pattern=#
+command=exo-open --launch TerminalEmulator man %s
+regex=false
+
+[action1]
+name=İnternette Ara
+pattern=?
+command=exo-open --launch WebBrowser https://www.vuhuv.com.tr/?k=%u
+regex=false
+
+[action2]
+name=Wikipedia
+pattern=!w
+command=exo-open --launch WebBrowser https://en.wikipedia.org/wiki/%u
+regex=false
+
+[action3]
+name=Uçbirimde Çalıştır
+pattern=!
+command=exo-open --launch TerminalEmulator %s
+regex=false
+
+[action4]
+name=URI aç
+pattern=^(file|http|https):\\/\\/(.*)$
+command=exo-open \\0
+regex=true
+
+[action5]
+name=Pardusta ara
+pattern=pp
+command=exo-open --launch WebBrowser https://forum.pardus.org.tr/search?q=%u
+regex=false
+

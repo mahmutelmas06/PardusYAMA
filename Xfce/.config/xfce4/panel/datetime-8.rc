@@ -1,0 +1,6 @@
+layout=3
+date_font=Sans Bold 11
+time_font=Liberation Serif Bold 26
+date_format=%d %B %Y
+time_format=%H:%M
+
