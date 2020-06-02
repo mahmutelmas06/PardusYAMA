@@ -18,7 +18,7 @@
 #  -Sağ tık Yeni Metin Belgesi, Çalışma Tablosu, Sunu gibi özellikler
 #  -Flatpak ve Winepak yüklenmesi
 #  -Bazı sistemsel ön ayarlar  
-#  -Kullanışlı birkaç Gnome eklentisi
+#  -Kullanışlı birkaç Gnome, XFCE eklentisi
 #  -Grub teması değiştirildi
 #  -Sistem ve Yazılım Güncelleştirmelerinin yapılması
 #  -Bazı uygulamaların Flatpak sürümleri  ile değiştirilmesi   
@@ -39,6 +39,7 @@ if [ "$UID" -eq "$ROOT_UID" ]; then 		# Root yetkisi var mı diye kontrol et.
 #==============================================================================
 
 # Masaüstünü belirle GNOME, KDE veya XFCE
+
 desktop=$(echo "$XDG_DATA_DIRS" | sed 's/.*\(xfce\|kde\|gnome\).*/\1/')
 desktop=${desktop,,}  						# Küçük harflere dönüştür
 xfce=$xfce
@@ -57,39 +58,41 @@ dpkg --add-architecture i386            	# İ386 desteğini etkinleştir
 _USERS="$(awk -F'[/:]' '{if ($3 >= 1000 && $3 != 65534) print $1}' /etc/passwd)" # Kullanıcı listesini al
 RUSER_UID=$(id -u ${_USERS})
 UHOME="/home"
+CONF=".config"
 
 #==============================================================================
 
-# apt-get -y install zenity
-#(
-#echo "# Seçim bekleniyor." ; sleep 2  		# Zenity yükleme göstergesi başlangıç
+# apt-get -y install zenity					# Zenity zaten önyüklü geliyor. Yine de bir köşede dursun.
+
+#(											# Zenity yükleme göstergesi başlangıç
+#echo "# Seçim bekleniyor." ; sleep 2  		
 
 if [[ $desktop = $xfce ]]; then
 
 action=$(zenity --list --checklist \
 	--height 500 --width 1000 \
+	--separator=":"
 	--title "İstediğiniz Yamaları Seçiniz." \
 	--column "Seçim" 	--column "Yapılacak işlem" 													--column "Açıklama" \
-			  TRUE 				  "Benzer işleri yapan uygulamaları kaldır" 								 " " \
-			  TRUE 				  "Sistemi güncelleştir ve Sık  Kullanılan uygulamaları yükle" 				 " " \
-			  TRUE 				  "Oyuncu araçlarını yükle" 												 "Steam ve Lutris yüklenerek gerekli ayarlar yapılır" \
-			  TRUE 				  "Wine yükle" 																 "Windows yazılımlarını Pardus'ta çalıştırabilmek için gereklidir" \
-			  TRUE 				  "Samba yükle ve yapılandır" 												 "Yerel ağda dosya ve yazıcı paylaşımı yapabilmek için gereklidir" \
-			  TRUE 				  "Betikleri ve Şablonları yükle" 											 "Sağ Tık menüsüne Yeni Belge, Masaüstü Kısayolu oluştur gibi seçenekler ekler" \
-			  TRUE 				  "XFCE Ayarlarını yap"		 												 "XFCE arayüzünü daha modern bir hale getirir" \
-			  TRUE 				  "Fontlar yükle"															 "Ücretsiz Temel Windows fontlarını yükler" \
-			  TRUE 				  "Grub teması yükle"														 "İşletim Sistemi Seçenekleri menüsünü görsel ve modern bir hale getirir" \
-	--separator=":")
+			  TRUE 				 "Yazılımları güncelleştir ve modernize et" 		   						 "Benzer yazılımlar silinir, birçoğu Flatpak sürümleri ile değiştirilir. " \
+			  TRUE 				 "Oyuncu araçlarını yükle" 												 	 "Steam ve Lutris yüklenerek gerekli ayarlar yapılır" \
+			  TRUE 				 "Wine yükle" 																 "Windows yazılımlarını Pardus'ta çalıştırabilmek için gereklidir" \
+			  TRUE 				 "Samba yükle ve yapılandır" 												 "Yerel ağda dosya ve yazıcı paylaşımı yapabilmek için gereklidir" \
+			  TRUE 				 "Betikleri ve Şablonları yükle" 											 "Sağ Tık menüsüne Yeni Belge, Masaüstü Kısayolu oluştur gibi seçenekler ekler" \
+			  TRUE 				 "XFCE Ayarlarını yap"		 												 "XFCE arayüzünü daha modern bir hale getirir" \
+			  TRUE 				 "Fontlar yükle"															 "Ücretsiz Temel Windows fontlarını yükler" \
+			  TRUE 				 "Grub teması yükle"														 "İşletim Sistemi Seçenekleri menüsünü görsel ve modern bir hale getirir" \
+		)
 
 
 else
 
 action=$(zenity --list --checklist \
 	--height 500 --width 975 \
+	--separator=":"
 	--title "İstediğiniz Yamaları Seçiniz." \
 	--column "Seçim" 	--column "Yapılacak işlem" 													--column "Açıklama" \
-			  TRUE 				  "Benzer işleri yapan uygulamaları kaldır" 								 " " \
-			  TRUE 				  "Sistemi güncelleştir ve Sık  Kullanılan uygulamaları yükle" 				 " " \
+			  TRUE 				  "Yazılımları güncelleştir ve modernize et" 			 					 "Benzer yazılımlar silinir, birçoğu Flatpak sürümleri ile değiştirilir. " \
 			  TRUE 				  "Oyuncu araçlarını yükle" 												 "Steam ve Lutris yüklenerek gerekli ayarlar yapılır" \
 			  TRUE 				  "Wine yükle" 																 "Windows yazılımlarını Pardus'ta çalıştırabilmek için gereklidir" \
 			  TRUE 				  "Samba yükle ve yapılandır" 												 "Yerel ağda dosya ve yazıcı paylaşımı yapabilmek için gereklidir" \
@@ -97,8 +100,10 @@ action=$(zenity --list --checklist \
 			  TRUE 				  "Gnome eklentilerini yükle ve sistem ince ayarlarını yap" 				 "Bilgisyarınıza yeni özellikler ekler" \
 			  TRUE 				  "Fontlar yükle"															 "Ücretsiz Temel Windows fontlarını yükler" \
 			  TRUE 				  "Grub teması yükle"														 "İşletim Sistemi Seçenekleri menüsünü görsel ve modern bir hale getirir" \
-	--separator=":")
+		)
 fi
+
+
 
 if [ -z "$action" ] ; then
    echo "Seçim yapılmadı"
@@ -127,35 +132,22 @@ case $word in
 #==============================================================================
 
 
-"Benzer"*)              					# Bazı uygulamaların kaldırılması ============================================
+"Yazılımları"*)              				# Bazı uygulamaların kaldırılması ve yenilerinin yüklenmesi =======================
 echo "5"
-echo "# Benzer işleri yapan uygulamalar sistemden kaldırılıyor." ; sleep 2
+
+
+echo "# Sistem güncelleştiriliyor." ; sleep 2
+apt-get update && apt-get -y upgrade && apt-get -y dist-upgrade && apt-get -y full-upgrade
+
+echo "# Benzer işleri yapan uygulamalar sistemden kaldırılıyor ve bazı yeni uygulamalar yükleniyor." ; sleep 2
 
 apt-get -y remove gdebi						# Pardus Paket Yükleyici adı altında bir Gdebi kopyası zaten yüklü
 apt-get -y remove gimp              		# Son kullanıcı için Pinta zaten yüklü. İhtiyaç duyan grafikçiler Gimp yükleyebilir.
 apt-get -y remove vlc						# Totemimiz vaaar.
 
 if [[ $desktop = $gnome ]]; then
-apt-get -y remove synaptic					# Gnome paketler ile aynı paketleri listeliyor. Gnome paketler bağımlılıktan ve güncelleme yardımcısından dolayı kaldırılamıyor. O yüzden bunu kaldırıyoruz. İhtiyaç duyan yükleyebilir. Benzer işi yapan 2 uygulama istemiyoruz.
+apt-get -y remove synaptic					# Gnome paketler ile aynı paketleri listeliyor. Gnome paketler bağımlılıktan ve güncelleme yardımcısından dolayı kaldırılamıyor. Benzer işi yapan 2 uygulama istemiyoruz.
 fi
-
-if [[ $desktop = $xfce ]]; then
-apt-get -y remove hddtemp xfce4-clipman deepin-deb-installer thunderbird gimp mousepad xfce4-notes ristretto xfce4-dict xfburn xfce4-sensors-plugin xfce4-appfinder
-apt-get -y install gedit
-flatpak install -y flathub org.gnome.Totem
-flatpak install -y flathub org.gnome.eog
-fi
-
-;;
-"Sistemi"*)  								# Sık kullanılan bazı uygulamaların yüklenmesi ===============================
-
-echo "15"
-echo "# Sistem güncelleştiriliyor." ; sleep 2
-
-apt-get update && apt-get -y upgrade && apt-get -y dist-upgrade && apt-get -y full-upgrade
-
-echo "20"
-echo "# Sık kullanılan uygulamalar yükleniyor." ; sleep 2
 
 
 apt-get -y install liblnk1 icoutils gir1.2-flatpak-1.0
@@ -164,32 +156,27 @@ if [[ $desktop = $gnome ]]; then
 apt-get -y install chrome-gnome-shell		# Gnome eklentileri tarayıcı eklentisini yükle
 fi
 
-apt-get -y install python3-pip          	# Pip komutunu kullanabilmek için gerekli kütüphane
+apt-get -y install git python3-pip ninja-build meson sassc         							 # Son kullanıcı olmasa da Çok kullanıcı için :)
 
-apt-get -y install git						# Github, Bitbuckets, Gitlab gibi sistemleri kullanabilmek için
+apt-get -y install gtk2-engines-murrine gtk2-engines-pixbuf									 # Sisteme tema eklerken istenen bağımlılıklar
+
+apt-get -y install ffmpeg imagemagick		# Video ve resim indirme ve düzenleme programları için gerekli uygulamaları yükle
 		
-apt-get -y install gtk2-engines-murrine gtk2-engines-pixbuf ninja-build meson sassc
-
-apt-get -y install ffmpeg					# Video ve resim indirme ve düzenleme programları için gerekli uygulamaları yükle
-apt-get -y install imagemagick				
 
 # echo "# Açık Kaynak Java yükleniyor." ; sleep 2
 # apt-get -y install openjdk-11-jre
 
-echo "# Yerel yazılımlar yükleniyor." ; sleep 2
-dpkg -R --install ./Yazılımlar/
-apt-get -fy install
 
-
-
-echo "30"
-echo "# Kalıntılar temizleniyor." ; sleep 2
-
-apt-get -y autoremove																		# Kalıntıları sil
-
-
-echo "35"
+echo "15"
 echo "# Bazı yazılımlar Flatpak sürümleri ile değiştirilip güncelleştiriliyor.\n \nBu işlem internet hızınıza göre biraz zaman alabilir." ; sleep 2
+
+if [[ $desktop = $xfce ]]; then
+apt-get -y remove hddtemp xfce4-clipman deepin-deb-installer thunderbird mousepad xfce4-notes ristretto xfce4-dict xfburn xfce4-sensors-plugin xfce4-appfinder
+
+apt-get -y install gedit					# Pardus Gnome sürümünde de Totem, Gedit ve EOG var. Sistemleri benzer tutmak kullanıcı eğitimlerinde ve alışkanlıklarında kolalıklar sağlayacaktır.
+flatpak install -y flathub org.gnome.Totem 
+flatpak install -y flathub org.gnome.eog
+fi
 
 apt-get -y remove thunderbird evolution
 flatpak install -y flathub org.gnome.Geary
@@ -199,7 +186,7 @@ flatpak install -y flathub org.gnome.Lollypop
 apt-get -y purge libreoffice*
 flatpak install -y flathub org.libreoffice.LibreOffice
 
-# apt-get -y remove firefox-esr				# Firefox silinince Chromium yükleniyor. Sistemsel bir önlem. O yüzden şimdilik burda dursun
+# apt-get -y remove firefox-esr				# Firefox silinince Chromium yükleniyor.
 # flatpak install -y flathub org.mozilla.firefox
 
 #user_pref("browser.startup.homepage", "https://vuhuv.com.tr/");
@@ -215,7 +202,6 @@ flatpak install -y flathub org.libreoffice.LibreOffice
 #user_pref("browser.startup.page", 3);
 #user_pref("browser.tabs.drawInTitlebar", true);
 #user_pref("browser.tabs.extraDragSpace", true);
-#user_pref("browser.uiCustomization.state", "{\"placements\":{\"widget-overflow-fixed-list\":[],\"nav-bar\":[\"back-button\",\"forward-button\",\"stop-reload-button\",\"find-button\",\"customizableui-special-spring5\",\"urlbar-container\",\"customizableui-special-spring2\",\"downloads-button\",\"history-panelmenu\",\"bookmarks-menu-button\",\"fxa-toolbar-menu-button\"],\"toolbar-menubar\":[\"menubar-items\"],\"TabsToolbar\":[\"tabbrowser-tabs\",\"new-tab-button\",\"alltabs-button\"],\"PersonalToolbar\":[\"personal-bookmarks\"]},\"seen\":[\"developer-button\"],\"dirtyAreaCache\":[\"nav-bar\",\"toolbar-menubar\",\"TabsToolbar\",\"PersonalToolbar\"],\"currentVersion\":16,\"newElementCount\":6}");
 #user_pref("browser.uidensity", 2);
 #user_pref("datareporting.healthreport.uploadEnabled", false);
 #user_pref("extensions.pendingOperations", true);
@@ -227,13 +213,23 @@ flatpak install -y flathub org.libreoffice.LibreOffice
 #user_pref("privacy.donottrackheader.enabled", true);
 #user_pref("toolkit.telemetry.cachedClientID", "c0ffeec0-ffee-c0ff-eec0-ffeec0ffeec0");
 
+
+echo "# Yerel yazılımlar yükleniyor." ; sleep 2
+dpkg -R --install ./Yazılımlar/
+apt-get -fy install
+
+echo "30"
+echo "# Kalıntılar temizleniyor." ; sleep 2
+
+apt-get -y autoremove						
+
 ;;
-"Oyuncu"*)  		# Oyuncu araçları Yüklemesi ==================================================================
+"Oyuncu"*)  		# Oyuncu araçları Yüklemesi ===========================================================================
 
 echo "25"
 echo "# Oyuncu araçları yükleniyor." ; sleep 2
 
-# flatpak install flathub com.valvesoftware.Steam  #Flatpak runtime sürümü depoda eski, bu eski sürümde de Nvidia-Steam sorunlu. O yüzden deb sürümü yüklenecek. 
+# flatpak install flathub com.valvesoftware.Steam  #Flatpak runtime sürümü depoda eski, bu eski sürümde de Nvidia-Steam sorunlu. O yüzden depoda Flatpak güncellenene kadar deb sürümü yükleyeceğiz. 
 
 cd ./Oyuncu
 wget https://steamcdn-a.akamaihd.net/client/installer/steam.deb 2>&1 | sed -u 's/.* \([0-9]\+%\)\ \+\([0-9.]\+.\) \(.*\)/\1\n# İndirme Hızı \2\/s, Kalan zaman \3/' | zenity --progress --title "İndirme İşlemi" --text "Steam indiriliyor..." --no-cancel --auto-close --pulsate
@@ -245,17 +241,18 @@ apt-get -fy install
 apt-get -y install libvulkan1 libvulkan1:i386 libvulkan-dev vulkan-utils libgl1:i386 mesa-vulkan-drivers libgl1-mesa-dri:i386 mesa-vulkan-drivers mesa-vulkan-drivers:i386
 
 #lutris --reinstall epic-games-store
-
-#lutris --reinstall battlenet
-apt-get install -y libgnutls30:i386 libldap-2.4-2:i386 libgpg-error0:i386 libsqlite3-0:i386
-
 #lutris --reinstall origin
 #lutris --reinstall gog-galaxy
 #lutris --reinstall rockstar-games-launcher
 
+#lutris --reinstall battlenet
+apt-get install -y libgnutls30:i386 libldap-2.4-2:i386 libgpg-error0:i386 libsqlite3-0:i386
+
+
+
 
 ;;
-"Wine"*)  		# Wine Yüklemesi ==================================================================
+"Wine"*)  		# Wine Yüklemesi ==========================================================================================
 
 echo "30"
 echo "# Wine yükleniyor ve yapılandırılıyor.\n \nİnternet hızınıza göre işlem uzayabilir.\n \nLütfen bekleyiniz..." ; sleep 2
@@ -269,7 +266,7 @@ apt-get -y install libvulkan1 libvulkan1:i386 libvulkan-dev vulkan-utils mesa-vu
 
 
 ;;
-"Samba"*)  		# Samba Yüklemesi ==================================================================
+"Samba"*)  		# Samba Yüklemesi =========================================================================================
 
 echo "37"
 echo "# Samba kurulup kullanıma hazır hale gelmesi için ayarları yapılıyor." ; sleep 2
@@ -302,7 +299,6 @@ systemctl restart smbd.service
 echo "45"
 echo "# Sağ Tık menüsü geliştiriliyor..." ; sleep 2
 
-CONF=".config"
 SAB="Şablonlar"
 BET=".local/share/nautilus/scripts"               
 _FILESB="./Betikler/*"	
@@ -364,7 +360,6 @@ done
 
 killall xfconfd
 
-CONF=".config"     
 _FILESX="./Xfce/*"  
 
 for u in $_USERS
@@ -441,6 +436,9 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfc
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c thunar -p /actions/action-3/command -s "exo-open --launch WebBrowser www.vuhuv.com.tr/%s"
 
 done
+
+
+
 ;;
 "Gnome"*)  # GNOME EKLENTİLERİNİ Yükle ==============================================================================
 echo "55"
