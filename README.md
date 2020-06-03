@@ -1,4 +1,3 @@
-# PardusYAMA
 ![](https://forum.pardus.org.tr/uploads/default/original/2X/a/a45430a672e21f0cb3be202fc6439b4bfd31d6c3.png)
 
 
