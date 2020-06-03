@@ -98,11 +98,10 @@ echo "100"
 
 ) |
 zenity --progress \
-  --title="Önyükleme hazırlanıyor" \
+  --title="Hazırlanıyor..." \
   --text="Yükleme başlatılıyor." \
   --percentage=0 \
-  --pulsate
-  --no-cancel
+  --pulsate \
   --auto-close
 
 #==============================================================================
@@ -365,7 +364,6 @@ _FILESS="./Şablonlar/*"
 done
 fi
 
-done
   
 ;;
 "XFCE"*)  # XFCE Ayarlarını yap =====================================================================================
