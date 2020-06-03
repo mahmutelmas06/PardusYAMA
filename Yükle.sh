@@ -72,7 +72,7 @@ gnome=$gnome
 echo "# Yükleme işlemi başlatılıyor." ; sleep 2		
 									 
 echo "15"
-echo "# Varsa APT sorunları çözülüyor." ; sleep 2	
+echo "# Varsa APT sorunları çözülüyor..." ; sleep 2	
 
 rm /var/lib/apt/lists/lock
 rm /var/cache/apt/archives/lock
@@ -81,19 +81,19 @@ dpkg --configure -a
 apt-get install -fy
 
 echo "35"
-echo "# Sisteme 32 Bit desteği eklenyor." ; sleep 2	
+echo "# Sisteme 32 Bit \ndesteği eklenyor..." ; sleep 2	
 
 dpkg --add-architecture i386            													# İ386 desteğini etkinleştir
 
 echo "70"
-echo "# Flatpak yükleniyor ve Flathub, Winepak depoları ekleniyor." ; sleep 2	
+echo "# Flatpak yükleniyor ve \nFlathub deposu ekleniyor..." ; sleep 2	
 
 apt-get -y update
 apt-get -y install flatpak                                                                  # ------------------------------
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo     # Flatpak desteğini etkinleştir
 flatpak remote-add --if-not-exists winepak https://dl.winepak.org/repo/winepak.flatpakrepo  # ------------------------------
 
-echo "# Önyükleme tamamlandı. Yükleme için kullanıcı seçimi bekleniyor" ; sleep 2
+echo "# Önyükleme tamamlandı. \n \nYükleme için kullanıcı seçimi bekleniyor..." ; sleep 2
 echo "100"
 
 ) |
@@ -162,7 +162,7 @@ case $word in
 
 
 
-echo "# Sistem güncelleştiriliyor." ; sleep 2
+echo "# Sistem \n güncelleştiriliyor..." ; sleep 2
 apt-get -y upgrade && apt-get -y dist-upgrade && apt-get -y full-upgrade
 
 echo "# Benzer işleri yapan uygulamalar sistemden kaldırılıyor ve bazı yeni uygulamalar yükleniyor." ; sleep 2
@@ -173,6 +173,7 @@ apt-get -y remove vlc						# Totemimiz vaaar.
 
 if [[ $desktop = $gnome ]]; then
 apt-get -y remove synaptic					# Gnome paketler ile aynı paketleri listeliyor. Gnome paketler bağımlılıktan ve güncelleme yardımcısından dolayı kaldırılamıyor.
+apt-get -y install materia-gtk-theme
 fi
 
 
@@ -180,12 +181,13 @@ if [[ $desktop = $gnome ]]; then
 apt-get -y install chrome-gnome-shell		# Gnome eklentileri tarayıcı eklentisini yükle
 fi
 
-apt-get -y install git python3-pip ninja-build meson sassc make        						 # Son kullanıcı olmasa da Çok kullanıcı için :)
+apt-get -y install ninja-build meson sassc make        						 			 	 # Son kullanıcı olmasa da Çok kullanıcı için :)
+#apt-get -y install python3-pip git
 
 apt-get -y install gtk2-engines-murrine gtk2-engines-pixbuf									 # Sisteme tema eklerken istenen bağımlılıklar
 
-apt-get -y install ffmpeg imagemagick		# Video ve resim indirme ve düzenleme programları için gerekli uygulamaları yükle
-		
+apt-get -y install ffmpeg 					# Video ve resim indirme ve düzenleme programları için gerekli uygulamaları yükle
+#apt-get -y install imagemagick	
 
 echo "# Bazı yazılımlar Flatpak sürümleri ile değiştirilip güncelleştiriliyor.\n \nBu işlem internet hızınıza göre biraz zaman alabilir." ; sleep 2
 
@@ -197,8 +199,9 @@ flatpak install -y flathub org.gnome.Totem
 flatpak install -y flathub org.gnome.eog
 fi
 
-apt-get -y remove thunderbird evolution
+apt-get -y remove thunderbird evolution evince
 flatpak install -y flathub org.gnome.Geary
+flatpak install -y flathub org.gnome.Evince
 
 flatpak install -y flathub org.gnome.Lollypop
 
@@ -232,7 +235,6 @@ flatpak install -y flathub org.libreoffice.LibreOffice
 #user_pref("privacy.donottrackheader.enabled", true);
 #user_pref("toolkit.telemetry.cachedClientID", "c0ffeec0-ffee-c0ff-eec0-ffeec0ffeec0");
 
-apt-get -y install liblnk1 icoutils gir1.2-flatpak-1.0
 
 echo "# Yerel yazılımlar yükleniyor." ; sleep 2
 dpkg -R --install ./Yazılımlar/
@@ -276,11 +278,11 @@ apt-get -fy install
 
 echo "# Wine yükleniyor ve yapılandırılıyor.\n \nİnternet hızınıza göre işlem uzayabilir.\n \nLütfen bekleyiniz..." ; sleep 2
 
-apt-get -y install wine winetricks mono-complete libgnutls30:i386 libldap-2.4-2:i386 libgpg-error0:i386 libxml2:i386 libasound2-plugins:i386 libsdl2-2.0-0:i386 libfreetype6:i386 libdbus-1-3:i386 libsqlite3-0:i386
+apt-get -y install wine winetricks libgnutls30:i386 libldap-2.4-2:i386 libgpg-error0:i386 libxml2:i386 libasound2-plugins:i386 libsdl2-2.0-0:i386 libfreetype6:i386 libdbus-1-3:i386 libsqlite3-0:i386
 
 winetricks -q directx9 dotnet40 corefonts ie8 vcrun2005 vcrun2008 vcrun2010 vcrun2015 vcrun2017 vcrun6sp6 dxvk
 
-apt-get -y install libvulkan1 libvulkan1:i386 libvulkan-dev vulkan-utils libgl1-mesa-dri:i386 mesa-vulkan-drivers mesa-vulkan-drivers:i386 libgl1:i386
+apt-get -y install libvulkan1 libvulkan1:i386 libvulkan-dev vulkan-utils mesa-vulkan-drivers libgl1:i386
 
 
 
@@ -290,7 +292,7 @@ apt-get -y install libvulkan1 libvulkan1:i386 libvulkan-dev vulkan-utils libgl1-
 
 echo "# Samba kurulup kullanıma hazır hale gelmesi için ayarları yapılıyor." ; sleep 2
 
-apt-get -y install samba smbclient winbind libpam-winbind libnss-winbind samba-vfs-modules samba-common libcups2 cups cifs-utils libpam-smbpass
+apt-get -y install samba smbclient winbind libpam-winbind libnss-winbind samba-vfs-modules samba-common libcups2 cups cifs-utils
 
 if [[ $desktop = $gnome ]]; then
 apt-get -y install nautilus-share
