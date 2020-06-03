@@ -5,25 +5,32 @@
 #  Yazar         : MAHMUT ELMAS
 #  İndirme Linki : https://github.com/mahmutelmas06/PardusYAMA
 #  İletişim      : mahmutelmas06@gmail.com
-#  Sürüm         : 0.4
-#  Bağımlıkıklar : zenity apt
-#  Lisans        : MIT - Diğer eklentilerin kendi lisansları bulunmaktadır
+#  Sürüm         : 0.5
+#  Bağımlıkıklar : zenity apt wget
+#  Lisans        : MIT - Bazı eklentilerin kendi lisansları bulunmaktadır
 #
 #==============================================================================
 #
 #  ---------------------------  Tanım  ---------------------------
-#  Pardusta son kullanıcının işini kolaylaştırmak için ek özellikler ekler 
-#  -Masaüstü kısayol oluşturma
-#  -Uygulama kısayolu oluşturma
-#  -Sağ tık Yeni Metin Belgesi, Çalışma Tablosu, Sunu gibi özellikler
-#  -Flatpak ve Winepak yüklenmesi
-#  -Bazı sistemsel ön ayarlar  
-#  -Kullanışlı birkaç Gnome, XFCE eklentisi
-#  -Grub teması değiştirildi
-#  -Sistem ve Yazılım Güncelleştirmelerinin yapılması
-#  -Bazı uygulamaların Flatpak sürümleri  ile değiştirilmesi   
-#  
-#
+#  Pardusta son kullanıcının Pardus'a olan ilgisini çekmek ve komut satırını en aza indirmek için ek özellikler ekler. 
+# 
+# 
+#  -Gnome ve XFCE uyumludur
+#  -Masaüstüne kısayol oluşturma seçeneği (Gnome)
+#  -Masaüstüne Uygulama kısayolu oluşturma seçeneği (Gnome)
+#  -Sağ tık Yeni Metin Belgesi, Çalışma Tablosu, Yeni Sunu gibi özellikler
+#  -Tek tıkla Flatpak ve Flatpakref dosyaları yüklenmesi
+#  -Bazı sistemsel ön ayarlar otomatik olarak gerçekleşir 
+#  -Olmazsa olmaz bazı Gnome, XFCE eklentileri ve uygulamaları yüklenir
+#  -Grub teması daha görsel bir arayüz ile değiştirilir
+#  -Sistem ve sisemdeki tüm yazılımların güncelleştirmeleri gerçekleştirilir
+#  -Bazı uygulamalar Flatpak sürümleri ile değiştirilir  
+#  -XFCE de önyüklü bazı uygulamalar Gnome eşdeğerleri ile değiştirilerek benzer arayüz sağlanır
+#  -Dosya ve yazıcı paylaşımı uygulaması (Samba, Nautilus-Shares, Thunar-Shares) yüklenir ve ayarları yapılır
+#  -Windows uygulamalarını Pardus'ta çalıştıracak uygulama (Wine) yüklenir ve ayarları yapılır
+#  -Masaüstü sürükle bırak desteği eklenir (Gnome)
+#  -Ücretsiz Windows fontları yüklenir
+#  -Başlat menüsü eklenir (Gnome Arc Menu)
 #==============================================================================
 
 
@@ -32,40 +39,77 @@
 
 ROOT_UID=0	                        		# Root Kimliği
 MAX_DELAY=20                        		# Şifre girmek için beklenecek süre
-
-
 if [ "$UID" -eq "$ROOT_UID" ]; then 		# Root yetkisi var mı diye kontrol et.
 
 #==============================================================================
 
-# Masaüstünü belirle GNOME, KDE veya XFCE
+
+_USERS="$(awk -F'[/:]' '{if ($3 >= 1000 && $3 != 65534) print $1}' /etc/passwd)" 	# Sistemdeki kullanıcıları listele
+RUSER_UID=$(id -u ${_USERS})													 	# Kullanıcı ID kimlikleri
+
+for u in ${_USERS}							# Tüm betik Root olarak çalıştığı için kullanıcı bazlı işlemleri gerçekleştirir
+do
+
+UHOME="/home"
+CONF=".config"
+_dir="${UHOME}/${u}"
+
+#==============================================================================
+
+# Masaüstü türünü belirle GNOME, KDE veya XFCE
 
 desktop=$(echo "$XDG_DATA_DIRS" | sed 's/.*\(xfce\|kde\|gnome\).*/\1/')
 desktop=${desktop,,}  						# Küçük harflere dönüştür
 xfce=$xfce
 gnome=$gnome
 
-#==============================================================================
-
-
-
-dpkg --add-architecture i386            	# İ386 desteğini etkinleştir
-
 
 #==============================================================================
 
+# Olası Paket sorunlarına karşı önlemler
 
-_USERS="$(awk -F'[/:]' '{if ($3 >= 1000 && $3 != 65534) print $1}' /etc/passwd)" # Kullanıcı listesini al
-RUSER_UID=$(id -u ${_USERS})
-UHOME="/home"
-CONF=".config"
+( 	  # Zenity yükleme göstergesi başlangıç
+echo "# Yükleme işlemi başlatılıyor." ; sleep 2		
+									 
+echo "15"
+echo "# Varsa APT sorunları çözülüyor." ; sleep 2	
+
+rm /var/lib/apt/lists/lock
+rm /var/cache/apt/archives/lock
+dpkg --configure -a
+#dpkg --remove --force-remove --reinstreq
+apt-get install -fy
+
+echo "35"
+echo "# Sisteme 32 Bit desteği eklenyor." ; sleep 2	
+
+dpkg --add-architecture i386            													# İ386 desteğini etkinleştir
+
+echo "70"
+echo "# Flatpak yükleniyor ve Flathub, Winepak depoları ekleniyor." ; sleep 2	
+
+apt-get -y update
+apt-get -y install flatpak                                                                  # ------------------------------
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo     # Flatpak desteğini etkinleştir
+flatpak remote-add --if-not-exists winepak https://dl.winepak.org/repo/winepak.flatpakrepo  # ------------------------------
+
+echo "# Önyükleme tamamlandı. Yükleme için kullanıcı seçimi bekleniyor" ; sleep 2
+echo "100"
+
+) |
+zenity --progress \
+  --title="Önyükleme hazırlanıyor" \
+  --text="Yükleme başlatılıyor." \
+  --percentage=0 \
+  --pulsate
+  --no-cancel
+  --auto-close
 
 #==============================================================================
+												  			
+# command -v wget >/dev/null 2>&1 || { zenity --error --text="Please install wget"; exit 1; }
 
-# apt-get -y install zenity					# Zenity zaten önyüklü geliyor. Yine de bir köşede dursun.
 
-#(											# Zenity yükleme göstergesi başlangıç
-#echo "# Seçim bekleniyor." ; sleep 2  		
 
 if [[ $desktop = $xfce ]]; then
 
@@ -109,21 +153,6 @@ if [ -z "$action" ] ; then
 fi
 
 
-
-#==============================================================================
-
-
-
-apt-get -y install flatpak                                                                  # ------------------------------
-flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo     # Flatpak desteğini etkinleştir
-flatpak remote-add --if-not-exists winepak https://dl.winepak.org/repo/winepak.flatpakrepo  # ------------------------------
-
-
-
-
-#==============================================================================
-
-
 IFS=":" ; for word in $action ; do   		#  Zenity checklist için çoklu seçim komutu başlat
 case $word in 
 
@@ -131,11 +160,11 @@ case $word in
 
 
 "Yazılımları"*)              				# Bazı uygulamaların kaldırılması ve yenilerinin yüklenmesi =======================
-echo "5"
+
 
 
 echo "# Sistem güncelleştiriliyor." ; sleep 2
-apt-get update && apt-get -y upgrade && apt-get -y dist-upgrade && apt-get -y full-upgrade
+apt-get -y upgrade && apt-get -y dist-upgrade && apt-get -y full-upgrade
 
 echo "# Benzer işleri yapan uygulamalar sistemden kaldırılıyor ve bazı yeni uygulamalar yükleniyor." ; sleep 2
 
@@ -144,11 +173,9 @@ apt-get -y remove gimp              		# Son kullanıcı için Pinta zaten yükl�
 apt-get -y remove vlc						# Totemimiz vaaar.
 
 if [[ $desktop = $gnome ]]; then
-apt-get -y remove synaptic					# Gnome paketler ile aynı paketleri listeliyor. Gnome paketler bağımlılıktan ve güncelleme yardımcısından dolayı kaldırılamıyor. Benzer işi yapan 2 uygulama istemiyoruz.
+apt-get -y remove synaptic					# Gnome paketler ile aynı paketleri listeliyor. Gnome paketler bağımlılıktan ve güncelleme yardımcısından dolayı kaldırılamıyor.
 fi
 
-
-apt-get -y install liblnk1 icoutils gir1.2-flatpak-1.0
 
 if [[ $desktop = $gnome ]]; then
 apt-get -y install chrome-gnome-shell		# Gnome eklentileri tarayıcı eklentisini yükle
@@ -161,11 +188,6 @@ apt-get -y install gtk2-engines-murrine gtk2-engines-pixbuf									 # Sisteme t
 apt-get -y install ffmpeg imagemagick		# Video ve resim indirme ve düzenleme programları için gerekli uygulamaları yükle
 		
 
-# echo "# Açık Kaynak Java yükleniyor." ; sleep 2
-# apt-get -y install openjdk-11-jre
-
-
-echo "15"
 echo "# Bazı yazılımlar Flatpak sürümleri ile değiştirilip güncelleştiriliyor.\n \nBu işlem internet hızınıza göre biraz zaman alabilir." ; sleep 2
 
 if [[ $desktop = $xfce ]]; then
@@ -211,20 +233,22 @@ flatpak install -y flathub org.libreoffice.LibreOffice
 #user_pref("privacy.donottrackheader.enabled", true);
 #user_pref("toolkit.telemetry.cachedClientID", "c0ffeec0-ffee-c0ff-eec0-ffeec0ffeec0");
 
+apt-get -y install liblnk1 icoutils gir1.2-flatpak-1.0
 
 echo "# Yerel yazılımlar yükleniyor." ; sleep 2
 dpkg -R --install ./Yazılımlar/
 apt-get -fy install
 
-echo "30"
+
 echo "# Kalıntılar temizleniyor." ; sleep 2
 
-apt-get -y autoremove						
+apt-get -y autoremove
+apt-get -y clean				
 
 ;;
 "Oyuncu"*)  		# Oyuncu araçları Yüklemesi ===========================================================================
 
-echo "25"
+
 echo "# Oyuncu araçları yükleniyor." ; sleep 2
 
 # flatpak install flathub com.valvesoftware.Steam  #Flatpak runtime sürümü depoda eski, bu eski sürümde de Nvidia-Steam sorunlu. O yüzden depoda Flatpak güncellenene kadar deb sürümü yükleyeceğiz. 
@@ -236,15 +260,13 @@ cd ..
 dpkg -R --install ./Oyuncu/
 apt-get -fy install
 
-apt-get -y install libvulkan1 libvulkan1:i386 libvulkan-dev vulkan-utils libgl1:i386 mesa-vulkan-drivers libgl1-mesa-dri:i386 mesa-vulkan-drivers mesa-vulkan-drivers:i386
-
 #lutris --reinstall epic-games-store
 #lutris --reinstall origin
 #lutris --reinstall gog-galaxy
 #lutris --reinstall rockstar-games-launcher
 
 #lutris --reinstall battlenet
-apt-get install -y libgnutls30:i386 libldap-2.4-2:i386 libgpg-error0:i386 libsqlite3-0:i386
+#apt-get install -y libgnutls30:i386 libldap-2.4-2:i386 libgpg-error0:i386 libsqlite3-0:i386
 
 
 
@@ -252,21 +274,21 @@ apt-get install -y libgnutls30:i386 libldap-2.4-2:i386 libgpg-error0:i386 libsql
 ;;
 "Wine"*)  		# Wine Yüklemesi ==========================================================================================
 
-echo "30"
+
 echo "# Wine yükleniyor ve yapılandırılıyor.\n \nİnternet hızınıza göre işlem uzayabilir.\n \nLütfen bekleyiniz..." ; sleep 2
 
 apt-get -y install wine winetricks mono-complete libgnutls30:i386 libldap-2.4-2:i386 libgpg-error0:i386 libxml2:i386 libasound2-plugins:i386 libsdl2-2.0-0:i386 libfreetype6:i386 libdbus-1-3:i386 libsqlite3-0:i386
 
 winetricks -q directx9 dotnet40 corefonts ie8 vcrun2005 vcrun2008 vcrun2010 vcrun2015 vcrun2017 vcrun6sp6 dxvk
 
-apt-get -y install libvulkan1 libvulkan1:i386 libvulkan-dev vulkan-utils mesa-vulkan-drivers libgl1-mesa-dri:i386 mesa-vulkan-drivers mesa-vulkan-drivers:i386
+apt-get -y install libvulkan1 libvulkan1:i386 libvulkan-dev vulkan-utils libgl1-mesa-dri:i386 mesa-vulkan-drivers mesa-vulkan-drivers:i386 libgl1:i386
 
 
 
 ;;
 "Samba"*)  		# Samba Yüklemesi =========================================================================================
 
-echo "37"
+
 echo "# Samba kurulup kullanıma hazır hale gelmesi için ayarları yapılıyor." ; sleep 2
 
 apt-get -y install samba smbclient winbind libpam-winbind libnss-winbind samba-vfs-modules samba-common libcups2 cups cifs-utils libpam-smbpass
@@ -277,9 +299,6 @@ fi
 
 groupadd smbgrp
 
-for u in ${_USERS} 
-do
-
 usermod ${u} -aG smbgrp
 mv /etc/samba/smb.conf /etc/samba/defsmb.conf
 cp -r ./smb.conf /etc/samba/
@@ -287,14 +306,12 @@ find "/var/lib/samba/usershares" -type f -exec chmod 777 {} \+ # Samba izinleri.
 chown -R $(id -un ${u}):$(id -gn ${u}) "/var/lib/samba/usershares"
 
 
-done
-
 systemctl restart smbd.service
 
 
 ;;
 "Betikleri"*)  # Betikleri ve Şablonları Yükle ============================================================================================
-echo "45"
+
 echo "# Sağ Tık menüsü geliştiriliyor..." ; sleep 2
 
 SAB="Şablonlar"
@@ -302,10 +319,7 @@ BET=".local/share/nautilus/scripts"
 _FILESB="./Betikler/*"	
 _FILESS="./Şablonlar/*"  
 
-for u in $_USERS
-do
-
-  _dir="${UHOME}/${u}"
+  
   
   # .config/user-dirs.dirs dosyası yoksa oluştur.
 
@@ -360,10 +374,6 @@ killall xfconfd
 
 _FILESX="./Xfce/.config/."  
 
-for u in $_USERS
-do
-
-  _dir="${UHOME}/${u}"
   
 
    for f in $_FILESX
@@ -435,32 +445,40 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfc
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c thunar -p /actions/action-3/command --create -s "exo-open --launch WebBrowser www.vuhuv.com.tr/%s"
 
-done
-
 
 
 ;;
 "Gnome"*)  # GNOME EKLENTİLERİNİ Yükle ==============================================================================
-echo "55"
+
 echo "# Gnome eklentileri yükleniyor." ; sleep 2
+
+EXT_USERPATH="$_dir/.local/share/gnome-shell/extensions"
+EXT_SYSPATH="/usr/local/share/gnome-shell/extensions"
+GNOME_SITE="https://extensions.gnome.org/extension-data/"
+
+# create temporary files
+#TMP_ZIP=$(mktemp -t ext-XXXXXXXX.zip) && rm ${TMP_ZIP}
+
+#wget --quiet --header='Accept-Encoding:none' -O "${TMP_ZIP}" "${GNOME_SITE}${EXTENSION_URL}"
+#mkdir -p ${EXT_USERPATH}/${EXTENSION_UUID}
+#unzip -oq "${TMP_ZIP}" -d ${EXTENSION_PATH}/${EXTENSION_UUID}
+#chmod +r ${EXTENSION_PATH}/${EXTENSION_UUID}/*
+
+#unzip -c <extension zip file name> metadata.json | grep uuid | cut -d \" -f4
 
 GNM=".local/share/gnome-shell/extensions" 		
 _FILESG="./Gnome/*"
 
-for u in $_USERS
-do
-
-  _dir="${UHOME}/${u}"
 
    for f in $_FILESG
    do
     
 
-       cp -r "${f}" "$_dir/${GNM}" #  Dosyaları kopyala
- #     cp -r "${f}" "/usr/share/gnome-shell/extensions" #  Dosyaları sistem dizinine kopyala
+       cp -r "${f}" "$_dir/${GNM}" 																# Dosyaları kopyala
+ #     cp -r "${f}" "/usr/share/gnome-shell/extensions" 										# Dosyaları sistem dizinine kopyala
 
-       find "$_dir/${GNM}/" -type f -exec chmod 777 {} \+ # Eklenti izinleri
- #     find "/usr/share/gnome-shell/extensions" -type f -exec chmod 777 {} \+ # Sistem eklenti izinleri
+       find "$_dir/${GNM}/" -type f -exec chmod 777 {} \+ 										# Eklenti izinleri
+ #     find "/usr/local/share/gnome-shell/extensions" -type f -exec chmod 777 {} \+ 			# Sistem eklenti izinleri
        
        chown -R $(id -un $u):$(id -gn $u) "$_dir/${GNM}/."
 
@@ -469,7 +487,7 @@ done
 
 # Gnome Ayarları  # # # # # # # # # # # # # # # # # # # # # # #  # # # #
 
-echo "60"
+
 echo "# Sistem ince ayarları yapılıyor." ; sleep 2
 
 
@@ -572,21 +590,20 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gse
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/dash-to-panel/trans-panel-opacity "0.60"
 
-sudo rm -rf  /usr/local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
+rm -f -r /usr/local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
 
-sudo rm -rf ${UHOME}/${u}/.local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
+rm -f -r ${UHOME}/${u}/.local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
+
+rm -f ${TMP_ZIP}
 
 
 
 dconf update
 
-done
-
-
 
 ;;
 "Fontlar"*)  #  Temel Microsoft ücretsiz fontları yükleme =========================================================
-echo "70"
+
 echo "# Windows fontları yükleniyor." ; sleep 2
 
 
@@ -603,12 +620,14 @@ echo "# Windows fontları yükleniyor." ; sleep 2
 	fi
 
 	find /usr/share/fonts/truetype/msttcorefonts -type f -exec chmod 775 {} \+
-	fc-cache
+	
+	
+	fc-cache			#Font öntbelleğini temizle
 
 ;;
 
 "Grub"*)  # Grub2 Tema Yükleme  =====================================================================================
-echo "90"
+
 echo "# Yeni Grub teması yükleniyor. (İşletim Sistemi Seçenekleri menüsü)" ; sleep 2
 
 THEME_DIR="/usr/share/grub/themes"
@@ -642,7 +661,8 @@ GFXBT=4096x2160,1920x1080,1366x768,1024x768,auto
 
 ;;      
 esac
-done   #  Zenity checklist için çoklu seçim komutu kapat
+done					#  Zenity checklist için çoklu seçim komutu kapat
+done					#  Kullanıcı bazlı komutlar girişini kapat
 
 
 # # # # # # # # # # # # # # # # # # # # # # #  # # # # # # # # # # # # # # # # # # # # # # # 
@@ -652,16 +672,6 @@ done   #  Zenity checklist için çoklu seçim komutu kapat
 
 notify-send -t 2000 -i /usr/share/icons/gnome/32x32/status/info.png "İşlem Tamamlanmıştır"
 
-#echo "# Tamamlandı." ; sleep 2
-#echo "100"
-#) |
-#zenity --progress \
-#  --title="Yükleme İlerlemesi" \
-#  --text="Yönetici yetkileri sağlanıyor." \
-#  --percentage=2 \
-#  --pulsate
-
-#(( $? != 0 )) && zenity --error --text="Hata! İşlem iptal edildi."
 
 exit 0
 
