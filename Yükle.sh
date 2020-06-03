@@ -284,7 +284,7 @@ usermod ${u} -aG smbgrp
 mv /etc/samba/smb.conf /etc/samba/defsmb.conf
 cp -r ./smb.conf /etc/samba/
 find "/var/lib/samba/usershares" -type f -exec chmod 777 {} \+ # Samba izinleri. Şimdilik böyle. Alternatif çözüm üretilince değiştilecek.
-chown $(id -un ${u}):$(id -gn ${u}) "/var/lib/samba/usershares"
+chown -R $(id -un ${u}):$(id -gn ${u}) "/var/lib/samba/usershares"
 
 
 done
@@ -331,7 +331,7 @@ do
 
        find "$_dir/${SAB}/" -type f -exec chmod 777 {} \+ # Şablon izinleri
        
-       chown $(id -un $u):$(id -gn $u) "$_dir/${SAB}/"
+       chown -R $(id -un $u):$(id -gn $u) "$_dir/${SAB}/."
        
    done
    
@@ -345,7 +345,7 @@ do
 
        find "$_dir/${BET}/" -type f -exec chmod 777 {} \+ # Betik izinleri
        
-       chown $(id -un $u):$(id -gn $u) "$_dir/${BET}/"
+       chown -R $(id -un $u):$(id -gn $u) "$_dir/${BET}/."
       
 
 done
@@ -358,7 +358,7 @@ done
 
 killall xfconfd
 
-_FILESX="./Xfce/"  
+_FILESX="./Xfce/.config/."  
 
 for u in $_USERS
 do
@@ -373,11 +373,13 @@ do
 
        find "$_dir/${CONF}/" -type f -exec chmod 777 {} \+
        
-       chown $(id -un $u):$(id -gn $u) "$_dir/${CONF}/"
+       chown -R $(id -un $u):$(id -gn $u) "$_dir/${CONF}/."
+       
+       find "$_dir/${CONF}/" -type f -exec chmod 777 {} \+
        
    done
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /panels/panel-1/plugin-ids --create -t int -s 2 -t int -s 1 -t int -s 12 -t int -s 14 -t int -s 11 -t int -s 16 -t int -s 17 -t int -s 3 -t int -s 7 -t int -s 15 -t int -s 5 -t int -s 8 -t int -s 4 -t int -s 13
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /panels/panel-1/plugin-ids --create -t int -s 2 -t int -s 12 -t int -s 14 -t int -s 11 -t int -s 16 -t int -s 17 -t int -s 3 -t int -s 7 -t int -s 15 -t int -s 1 -t int -s 5 -t int -s 8 -t int -s 4 -t int -s 13
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /panels/panel-1/size -t int -s 44
 
@@ -460,7 +462,7 @@ do
        find "$_dir/${GNM}/" -type f -exec chmod 777 {} \+ # Eklenti izinleri
  #     find "/usr/share/gnome-shell/extensions" -type f -exec chmod 777 {} \+ # Sistem eklenti izinleri
        
-       chown $(id -un $u):$(id -gn $u) "$_dir/${GNM}/"
+       chown -R $(id -un $u):$(id -gn $u) "$_dir/${GNM}/."
 
 done
 
