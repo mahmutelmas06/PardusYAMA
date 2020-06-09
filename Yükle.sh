@@ -84,6 +84,8 @@ echo "35"
 echo "# Sisteme 32 Bit \ndesteği eklenyor..." ; sleep 2	
 
 dpkg --add-architecture i386            													# İ386 desteğini etkinleştir
+apt-get -y install linux-headers-$(uname -r)
+
 
 echo "70"
 echo "# Flatpak yükleniyor ve \nFlathub deposu ekleniyor..." ; sleep 2	
@@ -380,8 +382,6 @@ _FILESX="./Xfce/.config/."
    do
     
        cp -r "${f}" "$_dir/${CONF}/" 
-
-       find "$_dir/${CONF}/" -type f -exec chmod 777 {} \+
        
        chown -R $(id -un $u):$(id -gn $u) "$_dir/${CONF}/."
        
@@ -445,7 +445,14 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfc
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c thunar -p /actions/action-3/command --create -s "exo-open --launch WebBrowser www.vuhuv.com.tr/%s"
 
+echo "file:///home/${u}/İndirilenler" >> ~/.config/gtk-3.0/bookmarks
+echo "file:///home/${u}/Belgeler" >> ~/.config/gtk-3.0/bookmarks
+echo "file:///home/${u}/Resimler" >> ~/.config/gtk-3.0/bookmarks
+echo "file:///home/${u}/Müzik" >> ~/.config/gtk-3.0/bookmarks
+echo "file:///home/${u}/Videolar" >> ~/.config/gtk-3.0/bookmarks
 
+
+xfce4-panel -r
 
 ;;
 "Gnome"*)  # GNOME EKLENTİLERİNİ Yükle ==============================================================================
