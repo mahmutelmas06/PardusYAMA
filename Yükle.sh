@@ -50,9 +50,7 @@ RUSER_UID=$(id -u ${_USERS})													 	# Kullanıcı ID kimlikleri
 for u in ${_USERS}							# Tüm betik Root olarak çalıştığı için kullanıcı bazlı işlemleri gerçekleştirir
 do
 
-UHOME="/home"
-CONF=".config"
-_dir="${UHOME}/${u}"
+_dir="/home/${u}"
 
 #==============================================================================
 
@@ -69,7 +67,7 @@ gnome=$gnome
 # Olası Paket sorunlarına karşı önlemler
 
 ( 	  # Zenity yükleme göstergesi başlangıç
-echo "# Yükleme işlemi başlatılıyor." ; sleep 2		
+echo "# Öyükleme işlemi başlatılıyor." ; sleep 2		
 									 
 echo "15"
 echo "# Varsa APT sorunları çözülüyor..." ; sleep 2	
@@ -81,21 +79,21 @@ dpkg --configure -a
 apt-get install -fy
 
 echo "35"
-echo "# Sisteme 32 Bit \ndesteği eklenyor..." ; sleep 2	
+echo "# Sistemin 32 Bit \ndesteği denetleniyor..." ; sleep 2	
 
 dpkg --add-architecture i386            													# İ386 desteğini etkinleştir
 apt-get -y install linux-headers-$(uname -r)
 
 
 echo "70"
-echo "# Flatpak yükleniyor ve \nFlathub deposu ekleniyor..." ; sleep 2	
+echo "# Flatpak uygulaması ve \nFlathub deposu denetleniyor..." ; sleep 2	
 
 apt-get -y update
 apt-get -y install flatpak                                                                  # ------------------------------
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo     # Flatpak desteğini etkinleştir
 flatpak remote-add --if-not-exists winepak https://dl.winepak.org/repo/winepak.flatpakrepo  # ------------------------------
 
-echo "# Önyükleme tamamlandı. \n \nYükleme için kullanıcı seçimi bekleniyor..." ; sleep 2
+echo "# Önyükleme tamamlandı. \n \nYükleme için kullanıcı seçimine geçiliyor..." ; sleep 2
 echo "100"
 
 ) |
@@ -171,15 +169,13 @@ echo "# Benzer işleri yapan uygulamalar sistemden kaldırılıyor ve bazı yeni
 
 apt-get -y remove gdebi						# Pardus Paket Yükleyici adı altında bir Gdebi kopyası zaten yüklü
 apt-get -y remove gimp              		# Son kullanıcı için Pinta zaten yüklü. İhtiyaç duyan grafikçiler Gimp yükleyebilir.
-apt-get -y remove vlc						# Totemimiz vaaar.
+apt-get -y remove vlc						# Totem var.
 
 if [[ $desktop = $gnome ]]; then
 apt-get -y remove synaptic					# Gnome paketler ile aynı paketleri listeliyor. Gnome paketler bağımlılıktan ve güncelleme yardımcısından dolayı kaldırılamıyor.
-fi
 
-
-if [[ $desktop = $gnome ]]; then
 apt-get -y install chrome-gnome-shell		# Gnome eklentileri tarayıcı eklentisini yükle
+
 fi
 
 apt-get -y install ninja-build meson sassc make        						 			 	 # Son kullanıcı olmasa da Çok kullanıcı için :)
@@ -193,11 +189,10 @@ apt-get -y install ffmpeg 					# Video ve resim indirme ve düzenleme programlar
 echo "# Bazı yazılımlar Flatpak sürümleri ile değiştirilip güncelleştiriliyor.\n \nBu işlem internet hızınıza göre biraz zaman alabilir." ; sleep 2
 
 if [[ $desktop = $xfce ]]; then
-apt-get -y remove hddtemp xfce4-clipman deepin-deb-installer thunderbird mousepad xfce4-notes ristretto xfce4-dict xfburn xfce4-sensors-plugin xfce4-appfinder
+apt-get -y remove hddtemp xfce4-clipman deepin-deb-installer thunderbird xfce4-notes xfce4-dict xfburn xfce4-sensors-plugin xfce4-appfinder
 
-apt-get -y install gedit					# Pardus Gnome sürümünde de Totem, Gedit ve EOG var. Sistemleri benzer tutmak kullanıcı eğitimlerinde ve alışkanlıklarında kolalıklar sağlayacaktır.
-flatpak install -y flathub org.gnome.Totem 
-flatpak install -y flathub org.gnome.eog
+flatpak install -y flathub org.gnome.Totem	# Gnome sürümünde Totem var bunda da olsun benzer olsun.
+
 fi
 
 apt-get -y remove thunderbird evolution evince
@@ -373,27 +368,35 @@ fi
 
 killall xfconfd
 
-_FILESX="./Xfce/.config/."  
+
+dpkg -R --install ./Xfce/deb
+apt-get -fy install
+apt-mark hold materia-gtk-theme	# XFCE 4.12 uyumlu materia teması. Güncellenmesini engelle
+
+_FILESX="./Xfce/.config/."
 
   
 
    for f in $_FILESX
    do
     
-       cp -r "${f}" "$_dir/${CONF}/" 
+       cp -r "${f}" "$_dir/.config/" 
        
-       chown -R $(id -un $u):$(id -gn $u) "$_dir/${CONF}/."
+       chown -R $(id -un $u):$(id -gn $u) "$_dir/.config/."
        
-       find "$_dir/${CONF}/" -type f -exec chmod 777 {} \+
+       find "$_dir/.config/" -type f -exec chmod 777 {} \+
        
    done
 
-dpkg -R --install ./Xfce/
-apt-get -fy install
-apt-mark hold materia-gtk-theme	# XFCE 4.12 uyumlu materia teması. Güncellenmesini engelle
+wget https://github.com/vinceliuice/emerald-icon-theme/archive/master.zip
+unzip ./master.zip
+rm ./master.zip
+mv -f "./emerald-icon-theme-master/Emerald" "/usr/share/icons/"
+mv -f "./emerald-icon-theme-master/Emerald-Dark" "/usr/share/icons/"
+rm -r "./emerald-icon-theme-master"
 
-cp -r ./Xfce/emerald/. /usr/share/icons/
 gtk-update-icon-cache /usr/share/icons/Emerald*
+rm -r /home/${u}/.cache/
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /panels/panel-1/plugin-ids --create -t int -s 2 -t int -s 12 -t int -s 14 -t int -s 11 -t int -s 16 -t int -s 17 -t int -s 3 -t int -s 7 -t int -s 15 -t int -s 1 -t int -s 5 -t int -s 8 -t int -s 4 -t int -s 13
 
@@ -403,62 +406,65 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfc
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /panels/panel-1/enter-opacity -t int --create -s 90
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-16/items --create -a -s 15909264344.desktop
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-16/items -t string --create -a -s 15909264344.desktop
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-16 --create -t string -s launcher
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-14/items --create -a -s 15909264293.desktop
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-14/items -t string --create -a -s 15909264293.desktop
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-14 --create -t string -s launcher
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-12/items --create -a -s 15909264112.desktop
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-12/items -t string --create -a -s 15909264112.desktop
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-12 --create -t string -s launcher
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-11/items --create -a -s 15909263981.desktop
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-11/items -t string --create -a -s 15909263981.desktop
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-11 --create -t string -s launcher
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/theme -s Materia
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/theme -t string --create -s Materia
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/frame_opacity --create -s 94
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/frame_opacity -t int --create -s 94
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/inactive_opacity -- create -s 96
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/inactive_opacity -t int --create -s 96
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/title_font -s "Sans Bold 11"
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/title_font -t string -s "Sans Bold 11"
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xsettings -p /Net/ThemeName -s Materia
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xsettings -p /Net/ThemeName -t string -s Materia
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-desktop -p /desktop-icons/icon-size -s 48
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xsettings -p /Net/IconThemeName -t string -s Emerald
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-desktop -p /desktop-icons/file-icons/show-removable -s false
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-desktop -p /desktop-icons/icon-size -t int -s 48
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-15/size-max --create -s 30
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-desktop -p /desktop-icons/file-icons/show-removable -t bool -s false
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-15/show-frame --create -s true
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-15/size-max --create -t int -s 30
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c thunar -p /last-icon-view-zoom-level -s THUNAR_ZOOM_LEVEL_150_PERCENT
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-15/show-frame --create -t bool -s true
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c thunar -p /misc-thumbnail-mode -s THUNAR_THUMBNAIL_MODE_ALWAYS
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c thunar -p /last-icon-view-zoom-level -t string --create -s THUNAR_ZOOM_LEVEL_150_PERCENT
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c thunar -p /misc-date-style -s THUNAR_DATE_STYLE_SHORT
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c thunar -p /misc-thumbnail-mode -t string -s THUNAR_THUMBNAIL_MODE_ALWAYS
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c thunar -p /shortcuts-icon-size -s THUNAR_ICON_SIZE_32
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c thunar -p /misc-date-style -t string -s THUNAR_DATE_STYLE_SHORT
 
-#sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c thunar -p /misc-middle-click-in-tab -s TRUE
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c thunar -p /shortcuts-icon-size -t string -s THUNAR_ICON_SIZE_32
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c thunar -p /misc-recursive-permissions -s THUNAR_RECURSIVE_PERMISSIONS_NEVER
+#sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c thunar -p /misc-middle-click-in-tab --t bool s TRUE
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c thunar -p /actions/action-3/command --create -s "exo-open --launch WebBrowser www.vuhuv.com.tr/%s"
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c thunar -p /misc-recursive-permissions -t string -s THUNAR_RECURSIVE_PERMISSIONS_NEVER
 
-echo "file:///home/${u}/İndirilenler" >> ~/.config/gtk-3.0/bookmarks
-echo "file:///home/${u}/Belgeler" >> ~/.config/gtk-3.0/bookmarks
-echo "file:///home/${u}/Resimler" >> ~/.config/gtk-3.0/bookmarks
-echo "file:///home/${u}/Müzik" >> ~/.config/gtk-3.0/bookmarks
-echo "file:///home/${u}/Videolar" >> ~/.config/gtk-3.0/bookmarks
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c thunar -p /actions/action-3/command -t string --create -s "exo-open --launch WebBrowser www.vuhuv.com.tr/%s"
+
+echo "file:///home/"${u}"/İndirilenler" >> /home/${u}/.config/gtk-3.0/bookmarks
+echo "file:///home/"${u}"/Belgeler" >> /home/${u}/.config/gtk-3.0/bookmarks
+echo "file:///home/"${u}"/Resimler" >> /home/${u}/.config/gtk-3.0/bookmarks
+echo "file:///home/"${u}"/Müzik" >> /home/${u}/.config/gtk-3.0/bookmarks
+echo "file:///home/"${u}"/Videolar" >> /home/${u}/.config/gtk-3.0/bookmarks
+echo "#pulseaudio-button * { -gtk-icon-transform: scale(0.6); }" >> /home/${u}/.config/gtk-3.0/gtk.css
 
 
-xfce4-panel -r
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfce4-panel -r
 
 ;;
 "Gnome"*)  # GNOME EKLENTİLERİNİ Yükle ==============================================================================
@@ -605,7 +611,7 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dco
 
 rm -f -r /usr/local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
 
-rm -f -r ${UHOME}/${u}/.local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
+rm -f -r /home/${u}/.local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
 
 rm -f ${TMP_ZIP}
 
