@@ -4,9 +4,10 @@
 
 Son Kullanıcı için eklenmiş Pardus Özelliklerini içerir
 
+Yalnızca internet bağlantısı ile çalışır.
+
 
 - Sürücü Yükleme Yazılımı > https://github.com/mahmutelmas06/Nvidia-Surucu-Yukleyici
-- Flatpak, Snap ve Appimage için tek tıkla yükleyici-kaldırıcı
 
 
 
@@ -35,13 +36,11 @@ Yapılanlar
 - Java yüklemesi eklendi
 
 
-Seçim Ekranı
 
-![](https://forum.pardus.org.tr/uploads/default/original/2X/0/08b9b6e9a1cfb05e88bcec284c4a49d927e6fb6e.png)
 
 Grub Menüsü
 
-![](https://forum.pardus.org.tr/uploads/default/optimized/2X/d/d16e01d25fcf440dc61d5a33c907047c1d88581a_2_517x290.png)
+![](https://forum.pardus.org.tr/uploads/default/optimized/2X/2/200b3d29aec09b99550eea2bd0947105a1b6bc1a_2_499x375.png)
 
 Sağ Tık Menüsü
 
@@ -64,5 +63,25 @@ Samba Paylaşımı
 ![](https://forum.pardus.org.tr/uploads/default/optimized/2X/d/d8402250ad02412a3d41fcc7cb1fdd0f2d17a9aa_2_467x375.png)
 
 ![](https://forum.pardus.org.tr/uploads/default/original/2X/f/f88656e61f244d179c524c6054240c2c6c4a61ee.png)
+
+XFCE 
+
+Xfce teması Materia olarak ayarlandı
+Xfce simge seti Emerald olarak ayarlandı
+Xfce Panele Dosya Yöneticisi, Mağaza, Tarayıcı, Geary simgeleri eklendi
+Görsel birçok ince ayar yapıldı.
+Panel genişliği biraz artırıldı.
+Pencere şeffaflıkları eklenerek daha modern bir görüntü sağlandı
+Mousepad görsel ayarları yapıldı.
+Ses simgesinin aşırı büyük olması sorunu çözüldü
+Dosya yöneticisinin sol menüsüne Belgeler, İndirilenler, Resimler, Videolar eklendi
+Panel simgeleri yeniden düzenlendi. Panel ayarları yapıldı
+
+![](https://forum.pardus.org.tr/uploads/default/optimized/2X/9/9915d99dc117d1c1049e445e932b86dc5c4f1a36_2_517x262.jpeg)
+
+![](https://forum.pardus.org.tr/uploads/default/optimized/2X/6/66ac2b3065a6393e21cd03cb2e9e206e244652c4_2_581x500.png)
+
+![](https://forum.pardus.org.tr/uploads/default/optimized/2X/b/b0bcf99b9e5bdf8aac39b790529180dbb2278dcc_2_517x262.jpeg)
+
 
  
