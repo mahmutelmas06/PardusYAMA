@@ -292,6 +292,8 @@ flatpak install -y flathub org.libreoffice.LibreOffice
 
 
 echo "# Yerel yazılımlar yükleniyor." ; sleep 2
+
+apt-get install -y gir1.2-flatpak-1.0
 dpkg -R --install ./Yazılımlar/
 apt-get -fy install
 
@@ -450,6 +452,8 @@ _FILESX="./Xfce/.config/."
 wget https://github.com/vinceliuice/emerald-icon-theme/archive/master.zip
 unzip ./master.zip
 rm ./master.zip
+rm -rf /usr/share/icons/Emerald
+rm -rf /usr/share/icons/Emerald-Dark
 mv -f "./emerald-icon-theme-master/Emerald" "/usr/share/icons/"
 mv -f "./emerald-icon-theme-master/Emerald-Dark" "/usr/share/icons/"
 rm -r "./emerald-icon-theme-master"
