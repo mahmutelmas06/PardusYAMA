@@ -5,7 +5,7 @@
 #  Yazar         : MAHMUT ELMAS
 #  İndirme Linki : https://github.com/mahmutelmas06/PardusYAMA
 #  İletişim      : mahmutelmas06@gmail.com
-#  Sürüm         : 0.5
+#  Sürüm         : 0.6
 #  Bağımlıkıklar : zenity apt wget
 #  Lisans        : MIT - Bazı eklentilerin kendi lisansları bulunmaktadır
 #
@@ -31,86 +31,140 @@
 #  -Masaüstü sürükle bırak desteği eklenir (Gnome)
 #  -Ücretsiz Windows fontları yüklenir
 #  -Başlat menüsü eklenir (Gnome Arc Menu)
+
+
+#==============================================================================  Yönetici hakları kontrolü
+
+if [[ "$EUID" != "0" ]]; then
+	notify-send -t 2000 -i /usr/share/icons/gnome/32x32/status/info.png "Yönetici olarak çalıştırın ya da root şifrenizi girin."
+	echo -e "\nBu betik Yönetici Hakları ile çalıştırılmalıdır. Lütfen Şifrenizi giriniz...\n"
+	sudo "bash" "$0" "$@" ; exit 0
+fi
+
+
+NEYUKLU=$(dpkg -l | grep -E '^ii' | awk '{print $2}' | tail -n+5)				 # Yüklü tüm paketlerin listesi
+
+
+#==============================================================================  Zenity kontrolü
+
+if [[ -z "$(grep -F ' zenity ' <<< ${NEYUKLU[@]})" ]]; then
+
+  echo "# Zenity bulunamadı ve yükleniyor..."
+  apt-get install -y zenity
+  
+fi
+
+
+
+#==============================================================================  Başka bir yükleyici çalışıyor mu kontrol et
+
+checkPackageManager() {
+
+if [[ "$(pidof synaptic)" ]] || 
+   [[ $(pidof apt | wc -w) != "0" || $(pidof apt-get | wc -w) != "0" ]]; then
+
+   zenity --question --cancel-label="İptal Et" --ok-label="Devam Et" --title="Başka bir paket yöneticisi çalışıyor" \
+          --width="360" --height="120" --window-icon="warning" --icon-name="gtk-dialog-warning" \
+          --text="\nŞu anda başka bir paket yöneticisinin çalıştığı tespit edildi!!! \
+Devam etmeden önce diğer yükleyiciler sonlandırılacaktır.\n\nDevam etmek istiyor musunuz?" 2>/dev/null
+
+  if [[ "$?" != "0" ]]; then ${opt_procedure[@]}
+  else
+    killall -9 synaptic
+    killall -9 apt
+    killall -9 apt-get
+    killall -9 gdebi
+    killall -9 pdebi
+    killall -9 deepin-deb-installer
+    sleep 1
+  fi
+fi
+}
+
+opt_procedure="exit 0" ; checkPackageManager
+
+#==============================================================================  İnternet bağlantısı kontrolü
+
+echo -e "GET http://google.com HTTP/1.0\n\n" | nc google.com 80 > /dev/null 2>&1
+
+if [ $? -eq 0 ]; then
+    echo "İnternet Bağlantısı doğrulandı..."
+else
+    zenity --width 320 --error --title "İnternet Bağlantısı algılanmadı" --text "Bu uygulama internet bağlantısı gerektirir. \nİnternete bağlandıktan sonra tekrar çalıştırın."; exit 1
+fi
+
 #==============================================================================
 
 
+_USERS="$(grep "/bin/bash" < /etc/passwd | grep "[1][0-9][0-9][0-9]" | cut -d: -f1)"	# Sistemdeki kullanıcıları adlarını listele
+RUSER_UID=$(id -u ${_USERS})													 		# Kullanıcı ID numaraları
 
 
-
-ROOT_UID=0	                        		# Root Kimliği
-MAX_DELAY=20                        		# Şifre girmek için beklenecek süre
-if [ "$UID" -eq "$ROOT_UID" ]; then 		# Root yetkisi var mı diye kontrol et.
-
-#==============================================================================
-
-
-_USERS="$(awk -F'[/:]' '{if ($3 >= 1000 && $3 != 65534) print $1}' /etc/passwd)" 	# Sistemdeki kullanıcıları listele
-RUSER_UID=$(id -u ${_USERS})													 	# Kullanıcı ID kimlikleri
-
-for u in ${_USERS}							# Tüm betik Root olarak çalıştığı için kullanıcı bazlı işlemleri gerçekleştirir
+for u in ${_USERS}																		# Tüm betik Root olarak çalıştığı için kullanıcı bazlı işlemleri gerçekleştirir
 do
 
 _dir="/home/${u}"
 
-#==============================================================================
-
-# Masaüstü türünü belirle GNOME, KDE veya XFCE
-
-desktop=$(echo "$XDG_DATA_DIRS" | sed 's/.*\(xfce\|kde\|gnome\).*/\1/')
-desktop=${desktop,,}  						# Küçük harflere dönüştür
-xfce=$xfce
-gnome=$gnome
+#==============================================================================			# Masaüstü türünü belirle
 
 
-#==============================================================================
+#desktop=$(echo "$XDG_DATA_DIRS" | sed 's/.*\(xfce\|kde\|gnome\).*/\1/')
+desktop=$(echo "$XDG_CURRENT_DESKTOP")  											
 
-# Olası Paket sorunlarına karşı önlemler
+
+#==============================================================================	    	# Olası Paket sorunlarına karşı önlemler
 
 ( 	  # Zenity yükleme göstergesi başlangıç
 echo "# Öyükleme işlemi başlatılıyor." ; sleep 2		
-									 
-echo "15"
+
+
+							 
+
 echo "# Varsa APT sorunları çözülüyor..." ; sleep 2	
 
 rm /var/lib/apt/lists/lock
 rm /var/cache/apt/archives/lock
 dpkg --configure -a
-#dpkg --remove --force-remove --reinstreq
 apt-get install -fy
+apt-get update -y
 
-echo "35"
-echo "# Sistemin 32 Bit \ndesteği denetleniyor..." ; sleep 2	
 
-dpkg --add-architecture i386            													# İ386 desteğini etkinleştir
+
+echo "# Sistemin 32 Bit desteği denetleniyor..." ; sleep 2	
+
+dpkg --add-architecture i386 
 apt-get -y install linux-headers-$(uname -r)
 
 
-echo "70"
-echo "# Flatpak uygulaması ve \nFlathub deposu denetleniyor..." ; sleep 2	
 
-apt-get -y update
-apt-get -y install flatpak                                                                  # ------------------------------
-flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo     # Flatpak desteğini etkinleştir
-flatpak remote-add --if-not-exists winepak https://dl.winepak.org/repo/winepak.flatpakrepo  # ------------------------------
+
+echo "# Flatpak uygulaması ve Flathub deposu denetleniyor..." ; sleep 2	
+
+if [[ -z "$(grep -F ' flatpak ' <<< ${NEYUKLU[@]})" ]]; then
+apt-get -y install flatpak                                                            
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+flatpak remote-add --if-not-exists winepak https://dl.winepak.org/repo/winepak.flatpakrepo
+fi
+
 
 echo "# Önyükleme tamamlandı. \n \nYükleme için kullanıcı seçimine geçiliyor..." ; sleep 2
-echo "100"
+
+
 
 ) |
-zenity --progress \
-  --title="Hazırlanıyor..." \
-  --text="Yükleme başlatılıyor." \
-  --percentage=0 \
-  --pulsate \
-  --auto-close
+zenity 	--progress \
+		--title="Yükleme hazırlanıyor..." \
+		--text="Yükleme başlatılıyor." \
+		--percentage=0 \
+		--width 400 \
+		--pulsate \
+		--auto-close
 
-#==============================================================================
+#==============================================================================  Yükleme seçenekleri seçkesi
 												  			
-# command -v wget >/dev/null 2>&1 || { zenity --error --text="Please install wget"; exit 1; }
 
 
-
-if [[ $desktop = $xfce ]]; then
+if [ $(pgrep -c xfce4-panel) -gt 0 ]; then
 
 action=$(zenity --list --checklist \
 	--height 500 --width 1000 \
@@ -127,7 +181,7 @@ action=$(zenity --list --checklist \
 			--separator=":")
 
 
-else
+elif [ $(pgrep -c gnome-panel) -gt 0 ]; then
 
 action=$(zenity --list --checklist \
 	--height 500 --width 975 \
@@ -162,16 +216,18 @@ case $word in
 
 
 
-echo "# Sistem \n güncelleştiriliyor..." ; sleep 2
-apt-get -y upgrade && apt-get -y dist-upgrade && apt-get -y full-upgrade
+echo "# Sistem güncelleştiriliyor..." ; sleep 2
+apt-get -y update && apt-get -y upgrade && apt-get -y dist-upgrade && apt-get -y full-upgrade
+
+
 
 echo "# Benzer işleri yapan uygulamalar sistemden kaldırılıyor ve bazı yeni uygulamalar yükleniyor." ; sleep 2
 
 apt-get -y remove gdebi						# Pardus Paket Yükleyici adı altında bir Gdebi kopyası zaten yüklü
 apt-get -y remove gimp              		# Son kullanıcı için Pinta zaten yüklü. İhtiyaç duyan grafikçiler Gimp yükleyebilir.
-apt-get -y remove vlc						# Totem var.
+apt-get -y remove vlc						# Totem var, bağımlılıklarından dolayı totem kaldırılamıyor.
 
-if [[ $desktop = $gnome ]]; then
+if [ $(pgrep -c gnome-panel) -gt 0 ]; then
 apt-get -y remove synaptic					# Gnome paketler ile aynı paketleri listeliyor. Gnome paketler bağımlılıktan ve güncelleme yardımcısından dolayı kaldırılamıyor.
 
 apt-get -y install chrome-gnome-shell		# Gnome eklentileri tarayıcı eklentisini yükle
@@ -186,10 +242,13 @@ apt-get -y install gtk2-engines-murrine gtk2-engines-pixbuf									 # Sisteme t
 apt-get -y install ffmpeg 					# Video ve resim indirme ve düzenleme programları için gerekli uygulamaları yükle
 #apt-get -y install imagemagick	
 
+
+
+
 echo "# Bazı yazılımlar Flatpak sürümleri ile değiştirilip güncelleştiriliyor.\n \nBu işlem internet hızınıza göre biraz zaman alabilir." ; sleep 2
 
-if [[ $desktop = $xfce ]]; then
-apt-get -y remove hddtemp xfce4-clipman deepin-deb-installer thunderbird xfce4-notes xfce4-dict xfburn xfce4-sensors-plugin xfce4-appfinder
+if [ $(pgrep -c xfce4-panel) -gt 0 ]; then
+apt-get -y remove hddtemp deepin-deb-installer thunderbird xfce4-notes xfce4-dict xfburn xfce4-sensors-plugin xfce4-appfinder
 
 flatpak install -y flathub org.gnome.Totem	# Gnome sürümünde Totem var bunda da olsun benzer olsun.
 
@@ -290,7 +349,7 @@ echo "# Samba kurulup kullanıma hazır hale gelmesi için ayarları yapılıyor
 
 apt-get -y install samba smbclient winbind libpam-winbind libnss-winbind samba-vfs-modules samba-common libcups2 cups cifs-utils
 
-if [[ $desktop = $gnome ]]; then
+if [ $(pgrep -c gnome-panel) -gt 0 ]; then
 apt-get -y install nautilus-share
 fi
 
@@ -346,7 +405,7 @@ _FILESS="./Şablonlar/*"
        
    done
    
-   if [[ $desktop = $gnome ]]; then
+   if [ $(pgrep -c gnome-panel) -gt 0 ]; then
        
           for f in $_FILESB
    do
@@ -456,12 +515,16 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfc
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c thunar -p /actions/action-3/command -t string --create -s "exo-open --launch WebBrowser www.vuhuv.com.tr/%s"
 
+echo "#pulseaudio-button * { -gtk-icon-transform: scale(0.6); }" >> /home/${u}/.config/gtk-3.0/gtk.css
+
+  
+rm /home/${u}/.config/gtk-3.0/bookmarks
 echo "file:///home/"${u}"/İndirilenler" >> /home/${u}/.config/gtk-3.0/bookmarks
 echo "file:///home/"${u}"/Belgeler" >> /home/${u}/.config/gtk-3.0/bookmarks
 echo "file:///home/"${u}"/Resimler" >> /home/${u}/.config/gtk-3.0/bookmarks
 echo "file:///home/"${u}"/Müzik" >> /home/${u}/.config/gtk-3.0/bookmarks
 echo "file:///home/"${u}"/Videolar" >> /home/${u}/.config/gtk-3.0/bookmarks
-echo "#pulseaudio-button * { -gtk-icon-transform: scale(0.6); }" >> /home/${u}/.config/gtk-3.0/gtk.css
+
 
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfce4-panel -r
@@ -694,20 +757,6 @@ notify-send -t 2000 -i /usr/share/icons/gnome/32x32/status/info.png "İşlem Tam
 
 exit 0
 
-else
-
-  # Error message to continue
-  notify-send -t 2000 -i /usr/share/icons/gnome/32x32/status/info.png "Yönetici olarak çalıştırın"
-
-  # persisted execution of the script as root
-  read -p "Devam etmek için Yönetici şifrenizi girin : " -t${MAX_DELAY} -s
-  [[ -n "$REPLY" ]] && {
-    sudo -S <<< $REPLY $0
-  } || {
-    notify-send -t 2000 -i /usr/share/icons/gnome/32x32/status/info.png "Yönetici şifresini girmediğiniz için iptal edildi"
-    exit 1
-  }
-fi
 
 
 
