@@ -260,7 +260,7 @@ flatpak install -y flathub org.gnome.Evince
 
 flatpak install -y flathub org.gnome.Lollypop
 
-apt-get -y purge libreoffice*
+apt-get -y remove libreoffice
 flatpak install -y flathub org.libreoffice.LibreOffice
 
 # apt-get -y remove firefox-esr				# Firefox silinince Chromium yükleniyor.
@@ -430,9 +430,14 @@ fi
 killall xfconfd
 
 
-dpkg -R --install ./Xfce/deb
-apt-get -fy install
-apt-mark hold materia-gtk-theme	# XFCE 4.12 uyumlu materia teması. Güncellenmesini engelle
+#dpkg -R --install ./Xfce/deb
+#apt-get -fy install
+
+cp -r ./Tema/Genel/* /usr/share/themes/
+cp -r ./Tema/Simge/* /usr/share/icons/
+gtk-update-icon-cache	"/usr/share/icons/Qogir/"							 	 # Simge ön belleğini temizle
+gtk-update-icon-cache	"/usr/share/icons/Qogir-dark/"							 # Simge ön belleğini temizle
+
 
 _FILESX="./Xfce/.config/."
 
@@ -449,17 +454,9 @@ _FILESX="./Xfce/.config/."
        
    done
 
-wget https://github.com/vinceliuice/emerald-icon-theme/archive/master.zip
-unzip ./master.zip
-rm ./master.zip
-rm -rf /usr/share/icons/Emerald
-rm -rf /usr/share/icons/Emerald-Dark
-mv -f "./emerald-icon-theme-master/Emerald" "/usr/share/icons/"
-mv -f "./emerald-icon-theme-master/Emerald-Dark" "/usr/share/icons/"
-rm -r "./emerald-icon-theme-master"
 
-gtk-update-icon-cache /usr/share/icons/Emerald*
-rm -r /home/${u}/.cache/
+
+
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /panels/panel-1/plugin-ids --create -t int -s 2 -t int -s 12 -t int -s 14 -t int -s 11 -t int -s 16 -t int -s 17 -t int -s 3 -t int -s 7 -t int -s 15 -t int -s 1 -t int -s 5 -t int -s 8 -t int -s 4 -t int -s 13
 
@@ -485,7 +482,7 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfc
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-11 --create -t string -s launcher
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/theme -t string --create -s Materia
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/theme -t string --create -s Qogir-win-light
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/frame_opacity -t int --create -s 94
 
@@ -493,9 +490,9 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfc
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/title_font -t string -s "Sans Bold 11"
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xsettings -p /Net/ThemeName -t string -s Materia
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xsettings -p /Net/ThemeName -t string -s Qogir-win-light
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xsettings -p /Net/IconThemeName -t string -s Emerald
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xsettings -p /Net/IconThemeName -t string -s Qogir
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-desktop -p /desktop-icons/icon-size -t int -s 48
 
@@ -576,7 +573,10 @@ done
 
 echo "# Sistem ince ayarları yapılıyor." ; sleep 2
 
-apt-get -y install materia-gtk-theme
+cp -r ./Tema/Genel/* /usr/share/themes/
+cp -r ./Tema/Simge/* /usr/share/icons/
+gtk-update-icon-cache	"/usr/share/icons/Qogir"							 	 # Simge ön belleğini temizle
+gtk-update-icon-cache	"/usr/share/icons/Qogir-dark"							 # Simge ön belleğini temizle
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e arc-menu@linxgem33.com
 
@@ -670,17 +670,17 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dco
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/session/idle-delay uint32 "0"
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/interface/gtk-theme "'Materia'"
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/interface/gtk-theme "'Qogir-win-light'"
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gsettings set org.gnome.shell.extensions.user-theme name "'Materia-dark'"
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gsettings set org.gnome.shell.extensions.user-theme name "'Qogir-win-light'"
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gsettings set org.gnome.desktop.interface icon-theme "Qogir"
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/dash-to-panel/trans-panel-opacity "0.60"
 
 rm -f -r /usr/local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
 
 rm -f -r /home/${u}/.local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
-
-rm -f ${TMP_ZIP}
 
 
 
@@ -727,7 +727,7 @@ GFXBT=4096x2160,1920x1080,1366x768,1024x768,auto
 
   # Copy theme
 
-  cp -a ${THEME_NAME}/* ${THEME_DIR}/${THEME_NAME}
+  cp -a ./Tema/Grub/${THEME_NAME}/* ${THEME_DIR}/${THEME_NAME}
 
   # Set theme
 
@@ -756,11 +756,13 @@ done					#  Kullanıcı bazlı komutlar girişini kapat
 
 # İşlem tamamlanmıştır
 
-notify-send -t 2000 -i /usr/share/icons/gnome/32x32/status/info.png "İşlem Tamamlanmıştır"
+notify-send -t 8000 -i /usr/share/icons/gnome/32x32/status/info.png "İşlem Tamamlanmıştır."
 
+zenity --title "Yükleme Tamamlandı" --width 400 --question --text="Değişikliklerin etkili olabilmesi için bilgisayarınızı yeniden başlatmalısınız.\n \nŞimdi yeniden başlatmak ister misiniz ??"
+if [ $? = 0 ]; then
+    /sbin/reboot
 
-exit 0
-
-
-
+else
+    exit
+fi
 
