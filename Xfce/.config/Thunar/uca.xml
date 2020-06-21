@@ -1,0 +1,35 @@
+<?xml encoding="UTF-8" version="1.0"?>
+<actions>
+<action>
+	<icon>Terminal</icon>
+	<name>Burada Terminal Aç</name>
+	<unique-id>1590851867570282-1</unique-id>
+	<command>exo-open --working-directory %f --launch TerminalEmulator</command>
+	<description>Örnek bir eylem için örnek</description>
+	<patterns>*</patterns>
+	<directories/>
+</action>
+<action>
+	<icon>application-x-ms-dos-executable</icon>
+	<name>Wine ile aç</name>
+	<unique-id>1592740170117890-1</unique-id>
+	<command>wine $@</command>
+	<description>Bu dosyayı Linuxta Windows yazılımları çalıştırmak için uyumu sağlayan yazılım ile aç.</description>
+	<patterns>*.exe;*.msi;*.bat</patterns>
+	<other-files/>
+</action>
+<action>
+	<icon>user-group-new</icon>
+	<name>Dosya Sahipliğini Üstlen</name>
+	<unique-id>1592743588504402-1</unique-id>
+	<command>chown -R $USER:$USER &quot;$1&quot;</command>
+	<description>Chown komutunu çalıştırır</description>
+	<patterns>*</patterns>
+	<directories/>
+	<audio-files/>
+	<image-files/>
+	<other-files/>
+	<text-files/>
+	<video-files/>
+</action>
+</actions>

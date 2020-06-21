@@ -39,6 +39,8 @@ if [[ "$EUID" != "0" ]]; then
 	notify-send -t 2000 -i /usr/share/icons/gnome/32x32/status/info.png "Yönetici olarak çalıştırın ya da root şifrenizi girin."
 	echo -e "\nBu betik Yönetici Hakları ile çalıştırılmalıdır. Lütfen Şifrenizi giriniz...\n"
 	sudo "bash" "$0" "$@" ; exit 0
+else
+	echo "Yönetici hakları doğrulandı..."
 fi
 
 
@@ -88,7 +90,7 @@ opt_procedure="exit 0" ; checkPackageManager
 echo -e "GET http://google.com HTTP/1.0\n\n" | nc google.com 80 > /dev/null 2>&1
 
 if [ $? -eq 0 ]; then
-    echo "İnternet Bağlantısı doğrulandı..."
+    echo "İnternet bağlantısı doğrulandı..."
 else
     zenity --width 320 --error --title "İnternet Bağlantısı algılanmadı" --text "Bu uygulama internet bağlantısı gerektirir. \nİnternete bağlandıktan sonra tekrar çalıştırın."; exit 1
 fi
@@ -112,12 +114,14 @@ _dir="/home/${u}"
 desktop=$(echo "$XDG_CURRENT_DESKTOP")  											
 
 
-#==============================================================================	    	# Olası Paket sorunlarına karşı önlemler
+#==============================================================================	    	
 
 ( 	  # Zenity yükleme göstergesi başlangıç
 echo "# Öyükleme işlemi başlatılıyor." ; sleep 2		
 
 
+
+# Yüklemeye hazırlık aşamaları
 							 
 
 echo "# Varsa APT sorunları çözülüyor..." ; sleep 2	
@@ -142,12 +146,15 @@ echo "# Flatpak uygulaması ve Flathub deposu denetleniyor..." ; sleep 2
 
 if [[ -z "$(grep -F ' flatpak ' <<< ${NEYUKLU[@]})" ]]; then
 apt-get -y install flatpak                                                            
+fi
+
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 flatpak remote-add --if-not-exists winepak https://dl.winepak.org/repo/winepak.flatpakrepo
-fi
 
 
 echo "# Önyükleme tamamlandı. \n \nYükleme için kullanıcı seçimine geçiliyor..." ; sleep 2
+
+ln -sf ./Yamala.sh /usr/bin
 
 
 
@@ -160,7 +167,7 @@ zenity 	--progress \
 		--pulsate \
 		--auto-close
 
-#==============================================================================  Yükleme seçenekleri seçkesi
+#==============================================================================  Yükleme seçenekleri
 												  			
 
 
@@ -201,7 +208,7 @@ fi
 
 
 if [ -z "$action" ] ; then
-   echo "Seçim yapılmadı"
+   echo "Seçim yapılmadığı için çıkılıyor."
    exit 1
 fi
 
@@ -217,7 +224,7 @@ case $word in
 
 
 echo "# Sistem güncelleştiriliyor..." ; sleep 2
-apt-get -y update && apt-get -y upgrade && apt-get -y dist-upgrade && apt-get -y full-upgrade
+apt-get -y update && apt-get -y upgrade && apt-get -y dist-upgrade
 
 
 
@@ -248,7 +255,7 @@ apt-get -y install ffmpeg 					# Video ve resim indirme ve düzenleme programlar
 echo "# Bazı yazılımlar Flatpak sürümleri ile değiştirilip güncelleştiriliyor.\n \nBu işlem internet hızınıza göre biraz zaman alabilir." ; sleep 2
 
 if [ $(pgrep -c xfce4-panel) -gt 0 ]; then
-apt-get -y remove hddtemp deepin-deb-installer thunderbird xfce4-notes xfce4-dict xfburn xfce4-sensors-plugin xfce4-appfinder
+apt-get -y remove deepin-deb-installer thunderbird xfce4-dict xfburn
 
 flatpak install -y flathub org.gnome.Totem	# Gnome sürümünde Totem var bunda da olsun benzer olsun.
 
@@ -263,8 +270,8 @@ flatpak install -y flathub org.gnome.Lollypop
 apt-get -y remove libreoffice
 flatpak install -y flathub org.libreoffice.LibreOffice
 
-# apt-get -y remove firefox-esr				# Firefox silinince Chromium yükleniyor.
-# flatpak install -y flathub org.mozilla.firefox
+apt-get -y remove firefox-esr
+flatpak install -y flathub org.mozilla.firefox
 
 #user_pref("browser.startup.homepage", "https://vuhuv.com.tr/");
 #user_pref("app.shield.optoutstudies.enabled", false);
@@ -335,7 +342,7 @@ apt-get -fy install
 
 echo "# Wine yükleniyor ve yapılandırılıyor.\n \nİnternet hızınıza göre işlem uzayabilir.\n \nLütfen bekleyiniz..." ; sleep 2
 
-apt-get -y install wine winetricks libgnutls30:i386 libldap-2.4-2:i386 libgpg-error0:i386 libxml2:i386 libasound2-plugins:i386 libsdl2-2.0-0:i386 libfreetype6:i386 libdbus-1-3:i386 libsqlite3-0:i386
+apt-get -y install wine wine64 wine32:i386 winetricks libgnutls30:i386 libldap-2.4-2:i386 libgpg-error0:i386 libxml2:i386 libasound2-plugins:i386 libsdl2-2.0-0:i386 libfreetype6:i386 libdbus-1-3:i386 libsqlite3-0:i386
 
 winetricks -q directx9 dotnet40 corefonts ie8 vcrun2005 vcrun2008 vcrun2010 vcrun2015 vcrun2017 vcrun6sp6 dxvk
 
@@ -407,21 +414,19 @@ _FILESS="./Şablonlar/*"
        
    done
    
-   if [ $(pgrep -c gnome-panel) -gt 0 ]; then
        
           for f in $_FILESB
    do
     
+    if [ $(pgrep -c gnome-panel) -gt 0 ]; then
 
        cp -r "${f}" "$_dir/${BET}" #  Betikleri kopyala
 
        find "$_dir/${BET}/" -type f -exec chmod 777 {} \+ # Betik izinleri
        
-       chown -R $(id -un $u):$(id -gn $u) "$_dir/${BET}/."
-      
-
+       chown -R $(id -un $u):$(id -gn $u) "$_dir/${BET}/."     
+	fi
 done
-fi
 
   
 ;;
@@ -482,7 +487,7 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfc
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-11 --create -t string -s launcher
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/theme -t string --create -s Qogir-win-light
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/theme -t string --create -s Qogir-win
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/frame_opacity -t int --create -s 94
 
@@ -490,7 +495,7 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfc
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/title_font -t string -s "Sans Bold 11"
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xsettings -p /Net/ThemeName -t string -s Qogir-win-light
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xsettings -p /Net/ThemeName -t string -s Qogir-win
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xsettings -p /Net/IconThemeName -t string -s Qogir
 
@@ -670,9 +675,9 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dco
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/session/idle-delay uint32 "0"
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/interface/gtk-theme "'Qogir-win-light'"
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/interface/gtk-theme "'Qogir-win'"
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gsettings set org.gnome.shell.extensions.user-theme name "'Qogir-win-light'"
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gsettings set org.gnome.shell.extensions.user-theme name "'Qogir-win'"
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gsettings set org.gnome.desktop.interface icon-theme "Qogir"
 
@@ -758,7 +763,7 @@ done					#  Kullanıcı bazlı komutlar girişini kapat
 
 notify-send -t 8000 -i /usr/share/icons/gnome/32x32/status/info.png "İşlem Tamamlanmıştır."
 
-zenity --title "Yükleme Tamamlandı" --width 400 --question --text="Değişikliklerin etkili olabilmesi için bilgisayarınızı yeniden başlatmalısınız.\n \nŞimdi yeniden başlatmak ister misiniz ??"
+zenity --title "Yükleme Tamamlandı" --width 400 --question --text="Değişikliklerin etkili olabilmesi için bilgisayarınızı yeniden başlatmalısınız.\n \nŞimdi yeniden başlatmak ister misiniz ?"
 if [ $? = 0 ]; then
     /sbin/reboot
 
