@@ -110,13 +110,14 @@ _dir="/home/${u}"
 #==============================================================================			# Masaüstü türünü belirle
 
 
-if [ "$XDG_CURRENT_DESKTOP" = "" ]
+if [ "$XDG_CURRENT_DESKTOP"="" ]
 then
   desktop=$(echo "$XDG_DATA_DIRS" | sed 's/.*\(xfce\|kde\|gnome\).*/\1/')
 else
   desktop=$XDG_CURRENT_DESKTOP
 fi
-desktop=${desktop,,}  # tüm harfler küçük	
+
+
 				
 
 #==============================================================================	    	
@@ -175,7 +176,7 @@ zenity 	--progress \
 												  			
 
 
-if [ "$desktop" = "xfce" ]; then
+if [ "${desktop,,}"="xfce" ]; then
 
 action=$(zenity --list --checklist \
 	--height 500 --width 1000 \
@@ -191,8 +192,7 @@ action=$(zenity --list --checklist \
 			  TRUE 				 "Grub teması yükle"														 "İşletim Sistemi Seçenekleri menüsünü görsel ve modern bir hale getirir" \
 			--separator=":")
 
-
-if [ "$desktop" = "gnome" ]; then
+elif [ "${desktop,,}"="gnome" ]; then
 
 action=$(zenity --list --checklist \
 	--height 500 --width 975 \
@@ -238,7 +238,7 @@ apt-get -y remove gdebi						# Pardus Paket Yükleyici adı altında bir Gdebi k
 apt-get -y remove gimp              		# Son kullanıcı için Pinta zaten yüklü. İhtiyaç duyan grafikçiler Gimp yükleyebilir.
 apt-get -y remove vlc						# Totem var, bağımlılıklarından dolayı totem kaldırılamıyor.
 
-if [ "$desktop" = "gnome" ]; then
+if [ "${desktop,,}"="gnome" ]; then
 apt-get -y remove synaptic					# Gnome paketler ile aynı paketleri listeliyor. Gnome paketler bağımlılıktan ve güncelleme yardımcısından dolayı kaldırılamıyor.
 
 apt-get -y install chrome-gnome-shell		# Gnome eklentileri tarayıcı eklentisini yükle
@@ -258,7 +258,7 @@ apt-get -y install ffmpeg 					# Video ve resim indirme ve düzenleme programlar
 
 echo "# Bazı yazılımlar Flatpak sürümleri ile değiştirilip güncelleştiriliyor.\n \nBu işlem internet hızınıza göre biraz zaman alabilir." ; sleep 2
 
-if [ "$desktop" = "xfce" ]; then
+if [ "${desktop,,}"="xfce" ]; then
 apt-get -y remove deepin-deb-installer thunderbird xfce4-dict xfburn
 
 flatpak install -y flathub org.gnome.Totem	# Gnome sürümünde Totem var bunda da olsun benzer olsun.
@@ -362,7 +362,7 @@ echo "# Samba kurulup kullanıma hazır hale gelmesi için ayarları yapılıyor
 
 apt-get -y install samba smbclient winbind libpam-winbind libnss-winbind samba-vfs-modules samba-common libcups2 cups cifs-utils
 
-if [ "$desktop" = "gnome" ]; then
+if [ "${desktop,,}"="gnome" ]; then
 apt-get -y install nautilus-share
 fi
 
@@ -422,7 +422,7 @@ _FILESS="./Şablonlar/*"
           for f in $_FILESB
    do
     
-    if [ "$desktop" = "gnome" ]; then
+    if [ "${desktop,,}"="gnome" ]; then
 
        cp -r "${f}" "$_dir/${BET}" #  Betikleri kopyala
 
