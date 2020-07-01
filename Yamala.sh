@@ -35,6 +35,9 @@
 
 #==============================================================================  Yönetici hakları kontrolü
 
+xhost +
+clear
+
 if [[ "$EUID" != "0" ]]; then
 	notify-send -t 2000 -i /usr/share/icons/gnome/32x32/status/info.png "Yönetici olarak çalıştırın ya da root şifrenizi girin."
 	echo -e "\nBu betik Yönetici Hakları ile çalıştırılmalıdır. Lütfen Şifrenizi giriniz...\n"
