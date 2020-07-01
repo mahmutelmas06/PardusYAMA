@@ -105,7 +105,11 @@ RUSER_UID=$(id -u ${_USERS})													 		# Kullanıcı ID numaraları
 for u in ${_USERS}																		# Tüm betik Root olarak çalıştığı için kullanıcı bazlı işlemleri gerçekleştirir
 do
 
-_dir="/home/${u}"
+_dir="/home/${u}"																		# Kullanıcı ev dizini
+
+debmi="/usr/share/pardusyama"															# debian paketi mi değil mi
+
+
 
 #==============================================================================			# Masaüstü türünü belirle
 
@@ -306,10 +310,10 @@ echo "# Yerel yazılımlar yükleniyor." ; sleep 2
 
 apt-get install -y gir1.2-flatpak-1.0
 
-if [ ! -d usr/share/pardusyama/ ]; then
+if [ ! -d "$debmi" ]; then
 dpkg -R --install ./Yazılımlar/
 else
-dpkg -R --install usr/share/pardusyama/Yazılımlar/
+dpkg -R --install /usr/share/pardusyama/Yazılımlar/
 fi
 apt-get -fy install
 
@@ -327,20 +331,20 @@ echo "# Oyuncu araçları yükleniyor." ; sleep 2
 
 # flatpak install flathub com.valvesoftware.Steam  #Flatpak runtime sürümü depoda eski, bu eski sürümde de Nvidia-Steam sorunlu. O yüzden depoda Flatpak güncellenene kadar deb sürümü yükleyeceğiz. 
 
-if [ ! -d usr/share/pardusyama/ ]; then
+if [ ! -d "$debmi" ]; then
 cd ./Oyuncu
 else
-cd usr/share/pardusyama/Oyuncu
+cd /usr/share/pardusyama/Oyuncu
 fi
 
 wget https://steamcdn-a.akamaihd.net/client/installer/steam.deb 2>&1 | sed -u 's/.* \([0-9]\+%\)\ \+\([0-9.]\+.\) \(.*\)/\1\n# İndirme Hızı \2\/s, Kalan zaman \3/' | zenity --progress --title "İndirme İşlemi" --text "Steam indiriliyor..." --no-cancel --auto-close --pulsate
 chmod 777 steam*.deb
 cd ..
 
-if [ ! -d usr/share/pardusyama/ ]; then
+if [ ! -d "$debmi" ]; then
 dpkg -R --install ./Oyuncu/
 else
-dpkg -R --install usr/share/pardusyama/Oyuncu/
+dpkg -R --install /usr/share/pardusyama/Oyuncu/
 fi
 apt-get -fy install
 
@@ -386,10 +390,10 @@ groupadd smbgrp
 usermod ${u} -aG smbgrp
 mv /etc/samba/smb.conf /etc/samba/defsmb.conf
 
-if [ ! -d usr/share/pardusyama/ ]; then
+if [ ! -d "$debmi" ]; then
 cp -r ./smb.conf /etc/samba/
 else
-cp -r usr/share/pardusyama/smb.conf /etc/samba/
+cp -r /usr/share/pardusyama/smb.conf /etc/samba/
 fi
 
 find "/var/lib/samba/usershares" -type f -exec chmod 777 {} \+ # Samba izinleri. Şimdilik böyle. Alternatif çözüm üretilince değiştilecek.
@@ -407,13 +411,12 @@ echo "# Sağ Tık menüsü geliştiriliyor..." ; sleep 2
 SAB="Şablonlar"
 BET=".local/share/nautilus/scripts"      
 
-if [ ! -d usr/share/pardusyama/Oyuncu/ ];
-then
+if [ ! -d "$debmi" ]; then
 _FILESB="./Betikler/*"	
 _FILESS="./Şablonlar/*"  
 else      
-_FILESB="usr/share/pardusyama/Betikler/*"	
-_FILESS="usr/share/pardusyama/Şablonlar/*"  
+_FILESB="/usr/share/pardusyama/Betikler/*"	
+_FILESS="/usr/share/pardusyama/Şablonlar/*"  
 fi
   
   
@@ -468,20 +471,21 @@ killall xfconfd
 
 #dpkg -R --install ./Xfce/deb
 #apt-get -fy install
-if [ ! -d usr/share/pardusyama/ ]; then
+if [ ! -d "$debmi" ]; then
 cp -r ./Tema/Genel/* /usr/share/themes/
 cp -r ./Tema/Simge/* /usr/share/icons/
 else
-cp -r usr/share/pardusyama/Tema/Genel/* /usr/share/themes/
-cp -r usr/share/pardusyama/Tema/Simge/* /usr/share/icons/
+cp -r /usr/share/pardusyama/Tema/Genel/* /usr/share/themes/
+cp -r /usr/share/pardusyama/Tema/Simge/* /usr/share/icons/
 fi
+
 gtk-update-icon-cache	"/usr/share/icons/Qogir/"							 	 # Simge ön belleğini temizle
 gtk-update-icon-cache	"/usr/share/icons/Qogir-dark/"							 # Simge ön belleğini temizle
 
-if [ ! -d usr/share/pardusyama/ ]; then
+if [ ! -d "$debmi" ]; then
 _FILESX="./Xfce/.config/."
 else
-_FILESX="usr/share/pardusyama/Xfce/.config/."
+_FILESX="/usr/share/pardusyama/Xfce/.config/."
 fi
   
 
@@ -593,10 +597,10 @@ GNOME_SITE="https://extensions.gnome.org/extension-data/"
 
 GNM=".local/share/gnome-shell/extensions" 	
 
-if [ ! -d usr/share/pardusyama/ ]; then	
+if [ ! -d "$debmi" ]; then
 _FILESG="./Gnome/*"
 else
-_FILESG="usr/share/pardusyama/Gnome/*"
+_FILESG="/usr/share/pardusyama/Gnome/*"
 fi
 
    for f in $_FILESG
@@ -619,12 +623,12 @@ done
 
 echo "# Sistem ince ayarları yapılıyor." ; sleep 2
 
-if [ ! -d usr/share/pardusyama/ ]; then	
+if [ ! -d "$debmi" ]; then
 cp -r ./Tema/Genel/* /usr/share/themes/
 cp -r ./Tema/Simge/* /usr/share/icons/
 else
-cp -r usr/share/pardusyama/Tema/Genel/* /usr/share/themes/
-cp -r usr/share/pardusyama/Tema/Simge/* /usr/share/icons/
+cp -r /usr/share/pardusyama/Tema/Genel/* /usr/share/themes/
+cp -r /usr/share/pardusyama/Tema/Simge/* /usr/share/icons/
 fi
 
 gtk-update-icon-cache	"/usr/share/icons/Qogir"							 	 # Simge ön belleğini temizle
@@ -744,10 +748,10 @@ dconf update
 
 echo "# Windows fontları yükleniyor." ; sleep 2
 
-		if [ ! -d usr/share/pardusyama/ ]; then	
+		if [ ! -d "$debmi" ]; then
 		cp -r ./Fontlar/* /usr/share/fonts/truetype/msttcorefonts
 else
-		cp -r usr/share/pardusyama/Fontlar/* /usr/share/fonts/truetype/msttcorefonts
+		cp -r /usr/share/pardusyama/Fontlar/* /usr/share/fonts/truetype/msttcorefonts
 		echo "\Ücretsiz Windows Fontları yüklendi."
 	fi
 
@@ -773,10 +777,10 @@ GFXBT=4096x2160,1920x1080,1366x768,1024x768,auto
 
   # Copy theme
 
-if [ ! -d usr/share/pardusyama/ ]; then	
+if [ ! -d "$debmi" ]; then
   cp -a ./Tema/Grub/${THEME_NAME}/* ${THEME_DIR}/${THEME_NAME}
 else
-	cp -a usr/share/pardusyama/Tema/Grub/${THEME_NAME}/* ${THEME_DIR}/${THEME_NAME}
+	cp -a /usr/share/pardusyama/Tema/Grub/${THEME_NAME}/* ${THEME_DIR}/${THEME_NAME}
 fi
 
   # Set theme
