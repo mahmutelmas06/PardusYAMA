@@ -10,14 +10,6 @@
 	<directories/>
 </action>
 <action>
-    <icon>filefind</icon>
-    <_name>Bu Dizinde Ara</_name>
-    <command>catfish --path=%f</command>
-    <_description>Search for files within this folder</_description>
-    <patterns>*</patterns>
-    <directories/>
-</action>
-<action>
 	<icon>application-x-ms-dos-executable</icon>
 	<name>Wine ile aç</name>
 	<unique-id>1592740170117890-1</unique-id>
@@ -27,17 +19,21 @@
 	<other-files/>
 </action>
 <action>
-	<icon>user-group-new</icon>
-	<name>Dosya Sahipliğini Üstlen</name>
-	<unique-id>1592743588504402-1</unique-id>
-	<command>chown -R $USER:$USER &quot;$1&quot;</command>
-	<description>Chown komutunu çalıştırır</description>
+	<icon>filefind</icon>
+	<name>Bu dizinde bul</name>
+	<unique-id>1593858092345798-2</unique-id>
+	<command>catfish --path=%f</command>
+	<description>Bu dizin içerisinde dosyaları ara</description>
 	<patterns>*</patterns>
 	<directories/>
-	<audio-files/>
-	<image-files/>
+</action>
+<action>
+	<icon>nvidia</icon>
+	<name>Nvidia ile Aç</name>
+	<unique-id>1593619490294870-1</unique-id>
+	<command>primusrun $@</command>
+	<description>Performanslı ekran kartı sürücüsü ile çalıştır</description>
+	<patterns>*.exe;*.msi;*.bat;*.sh;*.desktop;*.ink;*.run;*.application;*.appimage</patterns>
 	<other-files/>
-	<text-files/>
-	<video-files/>
 </action>
 </actions>

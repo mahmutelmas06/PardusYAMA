@@ -5,7 +5,7 @@
 #  Yazar         : MAHMUT ELMAS
 #  İndirme Linki : https://github.com/mahmutelmas06/PardusYAMA
 #  İletişim      : mahmutelmas06@gmail.com
-#  Sürüm         : 0.6
+#  Sürüm         : 0.7
 #  Bağımlıkıklar : zenity apt wget
 #  Lisans        : MIT - Bazı eklentilerin kendi lisansları bulunmaktadır
 #
@@ -31,12 +31,17 @@
 #  -Masaüstü sürükle bırak desteği eklenir (Gnome)
 #  -Ücretsiz Windows fontları yüklenir
 #  -Başlat menüsü eklenir (Gnome Arc Menu)
+#  -Hem simge teması hem sistem teması Qogir-win olarak ayarlanır
 
+
+
+
+
+xhost +			# Terminalde protokol hatası vermemesi için
+clear
 
 #==============================================================================  Yönetici hakları kontrolü
 
-xhost +
-clear
 
 if [[ "$EUID" != "0" ]]; then
 	notify-send -t 2000 -i /usr/share/icons/gnome/32x32/status/info.png "Yönetici olarak çalıştırın ya da root şifrenizi girin."
@@ -47,7 +52,10 @@ else
 fi
 
 
-NEYUKLU=$(dpkg -l | grep -E '^ii' | awk '{print $2}' | tail -n+5)				 # Yüklü tüm paketlerin listesi
+#==============================================================================  Yüklü tüm paketlerin listesi
+
+
+NEYUKLU=$(dpkg -l | grep -E '^ii' | awk '{print $2}' | tail -n+5)			   
 
 
 #==============================================================================  Zenity kontrolü
@@ -98,6 +106,8 @@ else
     zenity --width 320 --error --title "İnternet Bağlantısı algılanmadı" --text "Bu uygulama internet bağlantısı gerektirir. \nİnternete bağlandıktan sonra tekrar çalıştırın."; exit 1
 fi
 
+
+
 #==============================================================================
 
 
@@ -105,27 +115,48 @@ _USERS="$(grep "/bin/bash" < /etc/passwd | grep "[1][0-9][0-9][0-9]" | cut -d: -
 RUSER_UID=$(id -u ${_USERS})													 		# Kullanıcı ID numaraları
 
 
-for u in ${_USERS}																		# Tüm betik Root olarak çalıştığı için kullanıcı bazlı işlemleri gerçekleştirir
+for u in ${_USERS}																		# Tüm betik Root olarak çalıştığı için sistemdeki tüm kullanıcılara yönelik işlemleri gerçekleştirir
 do
 
 _dir="/home/${u}"																		# Kullanıcı ev dizini
 
-debmi="/usr/share/pardusyama"															# debian paketi mi değil mi
+debmi="/usr/share/pardusyama"															# Debian paketi mi yüklü, betik mi çalışıyor ?
+		
+		
+			
+#==============================================================================           Masaüstü türünü belirle
 
 
+windowManagerName () {
+    local window=$(
+        xprop -root -notype
+    )
 
-#==============================================================================			# Masaüstü türünü belirle
+    local identifier=$(
+        echo "${window}" |
+        awk '$1=="_NET_SUPPORTING_WM_CHECK:"{print $5}'
+    )
+
+    local attributes=$(
+        xprop -id "${identifier}" -notype -f _NET_WM_NAME 8t
+    )
+
+    local name=$(
+        echo "${attributes}" |
+        grep "_NET_WM_NAME = " |
+        cut --delimiter=' ' --fields=3 |
+        cut --delimiter='"' --fields=2
+    )
+
+    echo "${name}"
+}
 
 
-if [ "$XDG_CURRENT_DESKTOP"="" ]
-then
-  desktop=$(echo "$XDG_DATA_DIRS" | sed 's/.*\(xfce\|kde\|gnome\).*/\1/')
-else
-  desktop=$XDG_CURRENT_DESKTOP
-fi
+windowManagerName
+
+echo "$windowManagerName kullandığınız tespit edildi."
 
 
-				
 
 #==============================================================================	    	
 
@@ -134,7 +165,7 @@ echo "# Öyükleme işlemi başlatılıyor." ; sleep 2
 
 
 
-# Yüklemeye hazırlık aşamaları
+# -----  Yüklemeye hazırlık aşamaları  ------------
 							 
 
 echo "# Varsa APT sorunları çözülüyor..." ; sleep 2	
@@ -167,7 +198,7 @@ flatpak remote-add --if-not-exists winepak https://dl.winepak.org/repo/winepak.f
 
 echo "# Önyükleme tamamlandı. \n \nYükleme için kullanıcı seçimine geçiliyor..." ; sleep 2
 
-ln -sf ./Yamala.sh /usr/bin
+# ln -sf ./Yamala.sh /usr/bin
 
 
 
@@ -183,13 +214,13 @@ zenity 	--progress \
 												  			
 
 
-if [ "${desktop,,}"="xfce" ]; then
+if [ "$windowManagerName"="Xfwm4" ]; then
 
 action=$(zenity --list --checklist \
 	--height 500 --width 1000 \
 	--title "İstediğiniz Yamaları Seçiniz." \
 	--column "Seçim" 	--column "Yapılacak işlem" 													--column "Açıklama" \
-			  TRUE 				 "Yazılımları güncelleştir ve modernize et" 		   						 "Benzer yazılımlar silinir, birçoğu Flatpak sürümleri ile değiştirilir. " \
+			  TRUE 				 "Yazılımları güncelleştir ve modernize et" 		   						 "Benzer yazılımlar silinir, diğerleri güncelleştirilir. " \
 			  TRUE 				 "Oyuncu araçlarını yükle" 												 	 "Steam ve Lutris yüklenerek gerekli ayarlar yapılır" \
 			  TRUE 				 "Wine yükle" 																 "Windows yazılımlarını Pardus'ta çalıştırabilmek için gereklidir" \
 			  TRUE 				 "Samba yükle ve yapılandır" 												 "Yerel ağda dosya ve yazıcı paylaşımı yapabilmek için gereklidir" \
@@ -199,13 +230,13 @@ action=$(zenity --list --checklist \
 			  TRUE 				 "Grub teması yükle"														 "İşletim Sistemi Seçenekleri menüsünü görsel ve modern bir hale getirir" \
 			--separator=":")
 
-elif [ "${desktop,,}"="gnome" ]; then
+else
 
 action=$(zenity --list --checklist \
 	--height 500 --width 975 \
 	--title "İstediğiniz Yamaları Seçiniz." \
 	--column "Seçim" 	--column "Yapılacak işlem" 													--column "Açıklama" \
-			  TRUE 				  "Yazılımları güncelleştir ve modernize et" 			 					 "Benzer yazılımlar silinir, birçoğu Flatpak sürümleri ile değiştirilir. " \
+			  TRUE 				  "Yazılımları güncelleştir ve modernize et" 			 					 "Benzer yazılımlar silinir, diğerleri güncelleştirilir. " \
 			  TRUE 				  "Oyuncu araçlarını yükle" 												 "Steam ve Lutris yüklenerek gerekli ayarlar yapılır" \
 			  TRUE 				  "Wine yükle" 																 "Windows yazılımlarını Pardus'ta çalıştırabilmek için gereklidir" \
 			  TRUE 				  "Samba yükle ve yapılandır" 												 "Yerel ağda dosya ve yazıcı paylaşımı yapabilmek için gereklidir" \
@@ -241,48 +272,34 @@ apt-get -y update && apt-get -y upgrade && apt-get -y dist-upgrade
 
 echo "# Benzer işleri yapan uygulamalar sistemden kaldırılıyor ve bazı yeni uygulamalar yükleniyor." ; sleep 2
 
-apt-get -y remove gdebi						# Pardus Paket Yükleyici adı altında bir Gdebi kopyası zaten yüklü
+apt-get -y remove gdebi						# Pardus Paket Yükleyici adı altında bir Gdebi kopyası ufak hataları da olsa zaten yüklü
 apt-get -y remove gimp              		# Son kullanıcı için Pinta zaten yüklü. İhtiyaç duyan grafikçiler Gimp yükleyebilir.
-apt-get -y remove vlc						# Totem var, bağımlılıklarından dolayı totem kaldırılamıyor.
+apt-get -y remove thunderbird
 
-if [ "${desktop,,}"="gnome" ]; then
+if [ "$windowManagerName" !="Xfwm4" ]; then
 apt-get -y remove synaptic					# Gnome paketler ile aynı paketleri listeliyor. Gnome paketler bağımlılıktan ve güncelleme yardımcısından dolayı kaldırılamıyor.
 
 apt-get -y install chrome-gnome-shell		# Gnome eklentileri tarayıcı eklentisini yükle
+
+apt-get -y remove vlc						# Totem var, bağımlılıklarından dolayı totem kaldırılamıyor.
 
 fi
 
 apt-get -y install ninja-build meson sassc make        						 			 	 # Son kullanıcı olmasa da Çok kullanıcı için :)
 #apt-get -y install python3-pip git
 
-apt-get -y install gtk2-engines-murrine gtk2-engines-pixbuf									 # Sisteme tema eklerken istenen bağımlılıklar
-
 apt-get -y install ffmpeg 					# Video ve resim indirme ve düzenleme programları için gerekli uygulamaları yükle
 #apt-get -y install imagemagick	
 
+apt-get -y install lollypop                
 
-
-
-echo "# Bazı yazılımlar Flatpak sürümleri ile değiştirilip güncelleştiriliyor.\n \nBu işlem internet hızınıza göre biraz zaman alabilir." ; sleep 2
-
-if [ "${desktop,,}"="xfce" ]; then
-apt-get -y remove deepin-deb-installer thunderbird xfce4-dict xfburn
-
-flatpak install -y flathub org.gnome.Totem	# Gnome sürümünde Totem var bunda da olsun benzer olsun.
+if [ "$windowManagerName"="Xfwm4" ]; then
+apt-get -y remove deepin-deb-installer xfce4-dict xfburn
 
 fi
 
-apt-get -y remove thunderbird evolution evince
-flatpak install -y flathub org.gnome.Geary
-flatpak install -y flathub org.gnome.Evince
 
-flatpak install -y flathub org.gnome.Lollypop
-
-apt-get -y remove libreoffice
-flatpak install -y flathub org.libreoffice.LibreOffice
-
-apt-get -y remove firefox-esr
-flatpak install -y flathub org.mozilla.firefox
+# Firefox özelliklerini gelecekte ayarlamak için saklayalım.
 
 #user_pref("browser.startup.homepage", "https://vuhuv.com.tr/");
 #user_pref("app.shield.optoutstudies.enabled", false);
@@ -384,7 +401,7 @@ echo "# Samba kurulup kullanıma hazır hale gelmesi için ayarları yapılıyor
 
 apt-get -y install samba smbclient winbind libpam-winbind libnss-winbind samba-vfs-modules samba-common libcups2 cups cifs-utils
 
-if [ "${desktop,,}"="gnome" ]; then
+if [ "$windowManagerName" !="Xfwm4" ]; then
 apt-get -y install nautilus-share
 fi
 
@@ -455,7 +472,7 @@ fi
           for f in $_FILESB
    do
     
-    if [ "${desktop,,}"="gnome" ]; then
+    if [ "$windowManagerName" !="Xfwm4" ]; then
 
        cp -r "${f}" "$_dir/${BET}" #  Betikleri kopyala
 
@@ -471,6 +488,7 @@ done
 
 killall xfconfd
 
+apt-get -y install gtk2-engines-murrine gtk2-engines-pixbuf									 # Sisteme tema eklerken istenen bağımlılıklar
 
 #dpkg -R --install ./Xfce/deb
 #apt-get -fy install
@@ -535,7 +553,7 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfc
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/frame_opacity -t int --create -s 94
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/inactive_opacity -t int --create -s 96
+sudo -u ${u} xfconf-query -c xfwm4 -p /general/inactive_opacity -t int --create -s 96
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/title_font -t string -s "Sans Bold 11"
 
@@ -584,17 +602,8 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfc
 
 echo "# Gnome eklentileri yükleniyor." ; sleep 2
 
-EXT_USERPATH="$_dir/.local/share/gnome-shell/extensions"
-EXT_SYSPATH="/usr/local/share/gnome-shell/extensions"
-GNOME_SITE="https://extensions.gnome.org/extension-data/"
-
-# create temporary files
-#TMP_ZIP=$(mktemp -t ext-XXXXXXXX.zip) && rm ${TMP_ZIP}
-
-#wget --quiet --header='Accept-Encoding:none' -O "${TMP_ZIP}" "${GNOME_SITE}${EXTENSION_URL}"
-#mkdir -p ${EXT_USERPATH}/${EXTENSION_UUID}
-#unzip -oq "${TMP_ZIP}" -d ${EXTENSION_PATH}/${EXTENSION_UUID}
-#chmod +r ${EXTENSION_PATH}/${EXTENSION_UUID}/*
+#EXT_USERPATH="$_dir/.local/share/gnome-shell/extensions"
+#EXT_SYSPATH="/usr/local/share/gnome-shell/extensions"
 
 #unzip -c <extension zip file name> metadata.json | grep uuid | cut -d \" -f4
 
@@ -622,6 +631,9 @@ done
 
 
 # Gnome Ayarları  # # # # # # # # # # # # # # # # # # # # # # #  # # # #
+
+
+apt-get -y install gtk2-engines-murrine gtk2-engines-pixbuf									 # Sisteme tema eklerken istenen bağımlılıklar
 
 
 echo "# Sistem ince ayarları yapılıyor." ; sleep 2
@@ -751,17 +763,23 @@ dconf update
 
 echo "# Windows fontları yükleniyor." ; sleep 2
 
-		if [ ! -d "$debmi" ]; then
+	# /usr/share/fonts/truetype/msttcorefonts kasörü var mı kontrol et
+	if [ ! -d /usr/share/fonts/truetype/msttcorefonts ];
+	then
+		mkdir /usr/share/fonts/truetype/msttcorefonts
+	fi
+
+	if [ ! -d "$debmi" ]; then
 		cp -r ./Fontlar/* /usr/share/fonts/truetype/msttcorefonts
-else
+	else
 		cp -r /usr/share/pardusyama/Fontlar/* /usr/share/fonts/truetype/msttcorefonts
-		echo "\Ücretsiz Windows Fontları yüklendi."
 	fi
 
 	find /usr/share/fonts/truetype/msttcorefonts -type f -exec chmod 775 {} \+
 	
 	
 	fc-cache			#Font öntbelleğini temizle
+	echo "\Ücretsiz Windows Fontları yüklendi."
 
 ;;
 
