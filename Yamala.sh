@@ -151,10 +151,11 @@ windowManagerName () {
     echo "${name}"
 }
 
-
-windowManagerName
-
-echo "$windowManagerName kullandığınız tespit edildi."
+if [ "$windowManagerName"="Xfwm4" ]; then
+echo " XFCE kullandığınız tespit edildi."
+else
+echo " GNOME kullandığınız tespit edildi."
+fi
 
 
 
@@ -294,7 +295,7 @@ apt-get -y install ffmpeg 					# Video ve resim indirme ve düzenleme programlar
 apt-get -y install lollypop                
 
 if [ "$windowManagerName"="Xfwm4" ]; then
-apt-get -y remove deepin-deb-installer xfce4-dict xfburn
+apt-get -y remove xfce4-dict Xfburn
 
 fi
 
