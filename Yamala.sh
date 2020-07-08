@@ -151,9 +151,12 @@ windowManagerName () {
     echo "${name}"
 }
 
-if [ "$windowManagerName"="Xfwm4" ]; then
+
+if [ "$(windowManagerName)" == "Xfwm4" ] ; then
+desktop=xfce
 echo " XFCE kullandığınız tespit edildi."
 else
+desktop=gnome
 echo " GNOME kullandığınız tespit edildi."
 fi
 
@@ -215,7 +218,7 @@ zenity 	--progress \
 												  			
 
 
-if [ "$windowManagerName"="Xfwm4" ]; then
+if [ "$desktop" == "xfce" ] ; then
 
 action=$(zenity --list --checklist \
 	--height 500 --width 1000 \
@@ -277,7 +280,7 @@ apt-get -y remove gdebi						# Pardus Paket Yükleyici adı altında bir Gdebi k
 apt-get -y remove gimp              		# Son kullanıcı için Pinta zaten yüklü. İhtiyaç duyan grafikçiler Gimp yükleyebilir.
 apt-get -y remove thunderbird
 
-if [ "$windowManagerName" !="Xfwm4" ]; then
+if [ "$desktop" == "gnome" ] ; then
 apt-get -y remove synaptic					# Gnome paketler ile aynı paketleri listeliyor. Gnome paketler bağımlılıktan ve güncelleme yardımcısından dolayı kaldırılamıyor.
 
 apt-get -y install chrome-gnome-shell		# Gnome eklentileri tarayıcı eklentisini yükle
@@ -294,7 +297,7 @@ apt-get -y install ffmpeg 					# Video ve resim indirme ve düzenleme programlar
 
 apt-get -y install lollypop                
 
-if [ "$windowManagerName"="Xfwm4" ]; then
+if [ "$desktop" == "xfce" ] ; then
 apt-get -y remove xfce4-dict Xfburn
 
 fi
@@ -402,7 +405,7 @@ echo "# Samba kurulup kullanıma hazır hale gelmesi için ayarları yapılıyor
 
 apt-get -y install samba smbclient winbind libpam-winbind libnss-winbind samba-vfs-modules samba-common libcups2 cups cifs-utils
 
-if [ "$windowManagerName" !="Xfwm4" ]; then
+if [ "$desktop" == "gnome" ] ; then
 apt-get -y install nautilus-share
 fi
 
@@ -473,7 +476,7 @@ fi
           for f in $_FILESB
    do
     
-    if [ "$windowManagerName" !="Xfwm4" ]; then
+    if [ "$desktop" == "gnome" ] ; then
 
        cp -r "${f}" "$_dir/${BET}" #  Betikleri kopyala
 
