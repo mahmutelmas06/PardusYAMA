@@ -753,9 +753,9 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gse
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/dash-to-panel/trans-panel-opacity "0.60"
 
-rm -f -r /usr/local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
+rm -rf /usr/share/gnome-shell/extensions/desktop-icons@csoriano/
 
-rm -f -r /home/${u}/.local/share/gnome-shell/extensions/add-on-desktop@maestroschan.fr
+rm -rf /home/${u}/.local/share/gnome-shell/extensions/desktop-icons@csoriano/
 
 
 
