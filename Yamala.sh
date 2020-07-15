@@ -281,11 +281,8 @@ apt-get -y remove gimp              		# Son kullanıcı için Pinta zaten yükl�
 apt-get -y remove thunderbird
 
 if [ "$desktop" == "gnome" ] ; then
-apt-get -y remove synaptic					# Gnome paketler ile aynı paketleri listeliyor. Gnome paketler bağımlılıktan ve güncelleme yardımcısından dolayı kaldırılamıyor.
 
 apt-get -y install chrome-gnome-shell		# Gnome eklentileri tarayıcı eklentisini yükle
-
-apt-get -y remove vlc						# Totem var, bağımlılıklarından dolayı totem kaldırılamıyor.
 
 fi
 
@@ -301,11 +298,6 @@ echo "/usr/bin/numlockx on" >> /home/${u}/.xprofile
 echo "numlockx on" >> /home/${u}/.bashrc
 echo "numlockx &" >> /home/${u}/.xinitrc
 echo "setleds -D +num" >> /home/${u}/.bash_profile
-
-if [ "$desktop" == "xfce" ] ; then
-apt-get -y remove xfce4-dict xfburn
-fi
-
 
 # Firefox özelliklerini gelecekte ayarlamak için saklayalım.
 
@@ -484,7 +476,7 @@ fi
 
        cp -r "${f}" "$_dir/${BET}" #  Betikleri kopyala
 
-       find "$_dir/${BET}/" -type f -exec chmod 777 {} \+ # Betik izinleri
+       find "$_dir/${BET}/" -type f -exec chmod 755 {} \+ # Betik izinleri
        
        chown -R $(id -un $u):$(id -gn $u) "$_dir/${BET}/."     
 	fi
@@ -785,7 +777,7 @@ echo "# Windows fontları yükleniyor." ; sleep 2
 		cp -r /usr/share/pardusyama/Fontlar/* /usr/share/fonts/truetype/msttcorefonts
 	fi
 
-	find /usr/share/fonts/truetype/msttcorefonts -type f -exec chmod 775 {} \+
+	find /usr/share/fonts/truetype/msttcorefonts -type f -exec chmod 755 {} \+
 	
 	
 	fc-cache			#Font öntbelleğini temizle
