@@ -8,13 +8,16 @@ Yalnızca internet bağlantısı ile çalışır.
 
 Yüklemek için 2 yol vardır.
 
-Birincisi:
+- Birincisi:
 https://github.com/mahmutelmas06/PardusYAMA/archive/master.zip
+
 Bu linkten zip olarak indirdiyeseniz klasöre çıkartın ve Burada Terminal Aç dedikten sonra aşağıdaki komutu yapıştırın.
+
 ./Yamala.sh
 
-İkincisi
+- İkincisi
 https://github.com/mahmutelmas06/PardusYAMA/releases/latest
+
 Bu linkten debian paketini indirin, çift tıklayarak yükleyin. Başlat menüsüne PardusYama olarak yüklendiğini göreceksiniz.
 
 
