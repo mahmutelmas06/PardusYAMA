@@ -295,11 +295,15 @@ apt-get -y install ninja-build meson sassc make        						 			 	 # Son kullan
 apt-get -y install ffmpeg 					# Video ve resim indirme ve düzenleme programları için gerekli uygulamaları yükle
 #apt-get -y install imagemagick	
 
-apt-get -y install lollypop                
+apt-get -y install numlockx                 # Açılışta otomatik olarak numlock etkinleştirmek için Lighdm, GDM, Gnome, X.org ve Xfce için ayarlar
+echo "greeter-setup-script=/usr/bin/numlockx on" >> /etc/lightdm/lightdm.conf
+echo "/usr/bin/numlockx on" >> /home/${u}/.xprofile
+echo "numlockx on" >> /home/${u}/.bashrc
+echo "numlockx &" >> /home/${u}/.xinitrc
+echo "setleds -D +num" >> /home/${u}/.bash_profile
 
 if [ "$desktop" == "xfce" ] ; then
-apt-get -y remove xfce4-dict Xfburn
-
+apt-get -y remove xfce4-dict xfburn
 fi
 
 
@@ -702,6 +706,8 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gno
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e custom-hot-corners@janrunx.gmail.com
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -d clipboard-indicator@tudmotu.com
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -d desktop-icons@csoriano
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e ding@rastersoft.com
 
