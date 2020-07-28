@@ -120,9 +120,7 @@ do
 
 _dir="/home/${u}"																		# Kullanıcı ev dizini
 
-debmi="/usr/share/pardusyama"															# Debian paketi mi yüklü, betik mi çalışıyor ?
-		
-		
+	
 			
 #==============================================================================           Masaüstü türünü belirle
 
@@ -154,13 +152,28 @@ windowManagerName () {
 
 if [ "$(windowManagerName)" == "Xfwm4" ] ; then
 desktop=xfce
-echo " XFCE kullandığınız tespit edildi."
+echo "XFCE kullandığınız tespit edildi."
 else
 desktop=gnome
-echo " GNOME kullandığınız tespit edildi."
+echo "GNOME kullandığınız tespit edildi."
 fi
 
 
+#============================================================================== 		# Debian paketi mi yüklü, betik mi çalışıyor ?
+
+debmi="/usr/share/pardusyama"
+															
+if [ -d "$debmi" ]; then
+
+kaynak="/usr/share/pardusyama"
+echo "Pardusyama Deb paketi sürümü çalışıyor. Betik sürümünü kullanmak isterseniz sistemden deb paketini kaldırmalısınız."
+
+else
+
+echo "Pardusyama Deb paketi yüklü değil. Betik sürümü çalıştırılıyor..."
+kaynak="."
+
+fi		
 
 #==============================================================================	    	
 
@@ -193,17 +206,14 @@ apt-get -y install linux-headers-$(uname -r)
 echo "# Flatpak uygulaması ve Flathub deposu denetleniyor..." ; sleep 2	
 
 if [[ -z "$(grep -F ' flatpak ' <<< ${NEYUKLU[@]})" ]]; then
-apt-get -y install flatpak                                                            
-fi
 
+apt-get -y install flatpak                                                            
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 flatpak remote-add --if-not-exists winepak https://dl.winepak.org/repo/winepak.flatpakrepo
 
+fi
 
 echo "# Önyükleme tamamlandı. \n \nYükleme için kullanıcı seçimine geçiliyor..." ; sleep 2
-
-# ln -sf ./Yamala.sh /usr/bin
-
 
 
 ) |
@@ -224,12 +234,12 @@ action=$(zenity --list --checklist \
 	--height 500 --width 1000 \
 	--title "İstediğiniz Yamaları Seçiniz." \
 	--column "Seçim" 	--column "Yapılacak işlem" 													--column "Açıklama" \
-			  TRUE 				 "Yazılımları güncelleştir ve modernize et" 		   						 "Benzer yazılımlar silinir, diğerleri güncelleştirilir. " \
+			  TRUE 				 "Yazılımları ve Sistemi güncelleştir" 		   								 "Tüm yazılımlar güncelleştirilir ve bazı faydalı ek yazılımlar yüklenir. " \
 			  TRUE 				 "Oyuncu araçlarını yükle" 												 	 "Steam ve Lutris yüklenerek gerekli ayarlar yapılır" \
 			  TRUE 				 "Wine yükle" 																 "Windows yazılımlarını Pardus'ta çalıştırabilmek için gereklidir" \
 			  TRUE 				 "Samba yükle ve yapılandır" 												 "Yerel ağda dosya ve yazıcı paylaşımı yapabilmek için gereklidir" \
 			  TRUE 				 "Betikleri ve Şablonları yükle" 											 "Sağ Tık menüsüne Yeni Belge, Masaüstü Kısayolu oluştur gibi seçenekler ekler" \
-			  TRUE 				 "XFCE Ayarlarını yap"		 												 "XFCE arayüzünü daha modern bir hale getirir" \
+			  TRUE 				 "XFCE ince ayarlarını yap"		 											 "XFCE arayüzünü daha modern bir hale getirir" \
 			  TRUE 				 "Fontlar yükle"															 "Ücretsiz Temel Windows fontlarını yükler" \
 			  TRUE 				 "Grub teması yükle"														 "İşletim Sistemi Seçenekleri menüsünü görsel ve modern bir hale getirir" \
 			--separator=":")
@@ -240,7 +250,7 @@ action=$(zenity --list --checklist \
 	--height 500 --width 975 \
 	--title "İstediğiniz Yamaları Seçiniz." \
 	--column "Seçim" 	--column "Yapılacak işlem" 													--column "Açıklama" \
-			  TRUE 				  "Yazılımları güncelleştir ve modernize et" 			 					 "Benzer yazılımlar silinir, diğerleri güncelleştirilir. " \
+			  TRUE 				  "Yazılımları ve Sistemi güncelleştir" 		   							 "Tüm yazılımlar güncelleştirilir ve bazı faydalı ek yazılımlar yüklenir. " \
 			  TRUE 				  "Oyuncu araçlarını yükle" 												 "Steam ve Lutris yüklenerek gerekli ayarlar yapılır" \
 			  TRUE 				  "Wine yükle" 																 "Windows yazılımlarını Pardus'ta çalıştırabilmek için gereklidir" \
 			  TRUE 				  "Samba yükle ve yapılandır" 												 "Yerel ağda dosya ve yazıcı paylaşımı yapabilmek için gereklidir" \
@@ -272,25 +282,13 @@ case $word in
 echo "# Sistem güncelleştiriliyor..." ; sleep 2
 apt-get -y update && apt-get -y upgrade && apt-get -y dist-upgrade
 
+apt-get -y install ninja-build meson sassc make python3-pip    						 			 	 # Son kullanıcı olmasa da Çok kullanıcı için :)
+#apt-get -y install git
+
+apt-get -y install ffmpeg imagemagick		# Video ve resim indirme ve düzenleme programları için gerekli uygulamaları yükle
 
 
-echo "# Benzer işleri yapan uygulamalar sistemden kaldırılıyor ve bazı yeni uygulamalar yükleniyor." ; sleep 2
 
-apt-get -y remove gdebi						# Pardus Paket Yükleyici adı altında bir Gdebi kopyası ufak hataları da olsa zaten yüklü
-apt-get -y remove gimp              		# Son kullanıcı için Pinta zaten yüklü. İhtiyaç duyan grafikçiler Gimp yükleyebilir.
-apt-get -y remove thunderbird
-
-if [ "$desktop" == "gnome" ] ; then
-
-apt-get -y install chrome-gnome-shell		# Gnome eklentileri tarayıcı eklentisini yükle
-
-fi
-
-apt-get -y install ninja-build meson sassc make        						 			 	 # Son kullanıcı olmasa da Çok kullanıcı için :)
-#apt-get -y install python3-pip git
-
-apt-get -y install ffmpeg 					# Video ve resim indirme ve düzenleme programları için gerekli uygulamaları yükle
-#apt-get -y install imagemagick	
 
 apt-get -y install numlockx                 # Açılışta otomatik olarak numlock etkinleştirmek için Lighdm, GDM, Gnome, X.org ve Xfce için ayarlar
 echo "greeter-setup-script=/usr/bin/numlockx on" >> /etc/lightdm/lightdm.conf
@@ -298,6 +296,9 @@ echo "/usr/bin/numlockx on" >> /home/${u}/.xprofile
 echo "numlockx on" >> /home/${u}/.bashrc
 echo "numlockx &" >> /home/${u}/.xinitrc
 echo "setleds -D +num" >> /home/${u}/.bash_profile
+
+
+
 
 # Firefox özelliklerini gelecekte ayarlamak için saklayalım.
 
@@ -330,11 +331,8 @@ echo "# Yerel yazılımlar yükleniyor." ; sleep 2
 
 apt-get install -y gir1.2-flatpak-1.0
 
-if [ ! -d "$debmi" ]; then
-dpkg -R --install ./Yazılımlar/
-else
-dpkg -R --install /usr/share/pardusyama/Yazılımlar/
-fi
+dpkg -R --install "$kaynak"/Yazılımlar/
+
 apt-get -fy install
 
 
@@ -351,21 +349,13 @@ echo "# Oyuncu araçları yükleniyor." ; sleep 2
 
 # flatpak install flathub com.valvesoftware.Steam  #Flatpak runtime sürümü depoda eski, bu eski sürümde de Nvidia-Steam sorunlu. O yüzden depoda Flatpak güncellenene kadar deb sürümü yükleyeceğiz. 
 
-if [ ! -d "$debmi" ]; then
-cd ./Oyuncu
-else
-cd /usr/share/pardusyama/Oyuncu
-fi
+cd "$kaynak"/Oyuncu
 
 wget https://steamcdn-a.akamaihd.net/client/installer/steam.deb 2>&1 | sed -u 's/.* \([0-9]\+%\)\ \+\([0-9.]\+.\) \(.*\)/\1\n# İndirme Hızı \2\/s, Kalan zaman \3/' | zenity --progress --title "İndirme İşlemi" --text "Steam indiriliyor..." --no-cancel --auto-close --pulsate
 chmod 777 steam*.deb
 cd ..
 
-if [ ! -d "$debmi" ]; then
-dpkg -R --install ./Oyuncu/
-else
-dpkg -R --install /usr/share/pardusyama/Oyuncu/
-fi
+dpkg -R --install "$kaynak"/Oyuncu/
 apt-get -fy install
 
 #lutris --reinstall epic-games-store
@@ -410,11 +400,7 @@ groupadd smbgrp
 usermod ${u} -aG smbgrp
 mv /etc/samba/smb.conf /etc/samba/defsmb.conf
 
-if [ ! -d "$debmi" ]; then
-cp -r ./smb.conf /etc/samba/
-else
-cp -r /usr/share/pardusyama/smb.conf /etc/samba/
-fi
+cp -r "$kaynak"/smb.conf /etc/samba/
 
 find "/var/lib/samba/usershares" -type f -exec chmod 777 {} \+ # Samba izinleri. Şimdilik böyle. Alternatif çözüm üretilince değiştilecek.
 chown -R $(id -un ${u}):$(id -gn ${u}) "/var/lib/samba/usershares"
@@ -431,13 +417,10 @@ echo "# Sağ Tık menüsü geliştiriliyor..." ; sleep 2
 SAB="Şablonlar"
 BET=".local/share/nautilus/scripts"      
 
-if [ ! -d "$debmi" ]; then
-_FILESB="./Betikler/*"	
-_FILESS="./Şablonlar/*"  
-else      
-_FILESB="/usr/share/pardusyama/Betikler/*"	
-_FILESS="/usr/share/pardusyama/Şablonlar/*"  
-fi
+
+_FILESB=""$kaynak"/Betikler/*"	
+_FILESS=""$kaynak"/Şablonlar/*"  
+
   
   
   # .config/user-dirs.dirs dosyası yoksa oluştur.
@@ -492,22 +475,16 @@ apt-get -y install gtk2-engines-murrine gtk2-engines-pixbuf									 # Sisteme t
 
 #dpkg -R --install ./Xfce/deb
 #apt-get -fy install
-if [ ! -d "$debmi" ]; then
-cp -r ./Tema/Genel/* /usr/share/themes/
-cp -r ./Tema/Simge/* /usr/share/icons/
-else
-cp -r /usr/share/pardusyama/Tema/Genel/* /usr/share/themes/
-cp -r /usr/share/pardusyama/Tema/Simge/* /usr/share/icons/
-fi
+
+cp -r "$kaynak"/Tema/Genel/* /usr/share/themes/
+cp -r "$kaynak"/Tema/Simge/* /usr/share/icons/
+
 
 gtk-update-icon-cache	"/usr/share/icons/Qogir/"							 	 # Simge ön belleğini temizle
 gtk-update-icon-cache	"/usr/share/icons/Qogir-dark/"							 # Simge ön belleğini temizle
 
-if [ ! -d "$debmi" ]; then
-_FILESX="./Xfce/.config/."
-else
-_FILESX="/usr/share/pardusyama/Xfce/.config/."
-fi
+_FILESX=""$kaynak"/Xfce/.config/."
+
   
 
    for f in $_FILESX
@@ -553,7 +530,7 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfc
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/frame_opacity -t int --create -s 94
 
-sudo -u ${u} xfconf-query -c xfwm4 -p /general/inactive_opacity -t int --create -s 96
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/inactive_opacity -t int --create -s 96
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/title_font -t string -s "Sans Bold 11"
 
@@ -602,30 +579,28 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfc
 
 echo "# Gnome eklentileri yükleniyor." ; sleep 2
 
+apt-get -y install chrome-gnome-shell									# Gnome eklentileri tarayıcı eklentisini yükle
+
 #EXT_USERPATH="$_dir/.local/share/gnome-shell/extensions"
 #EXT_SYSPATH="/usr/local/share/gnome-shell/extensions"
 
 #unzip -c <extension zip file name> metadata.json | grep uuid | cut -d \" -f4
 
-GNM=".local/share/gnome-shell/extensions" 	
+GNM="/usr/share/gnome-shell/extensions"	
 
-if [ ! -d "$debmi" ]; then
-_FILESG="./Gnome/*"
-else
-_FILESG="/usr/share/pardusyama/Gnome/*"
-fi
+_FILESG=""$kaynak"/Gnome/*"
+
 
    for f in $_FILESG
    do
     
 
-       cp -r "${f}" "$_dir/${GNM}" 																# Dosyaları kopyala
- #     cp -r "${f}" "/usr/share/gnome-shell/extensions" 										# Dosyaları sistem dizinine kopyala
+       cp -r "${f}" "${GNM}" 																# Dosyaları kopyala
 
-       find "$_dir/${GNM}/" -type f -exec chmod 777 {} \+ 										# Eklenti izinleri
+       find "${GNM}/" -type f -exec chmod 777 {} \+ 										# Eklenti izinleri
  #     find "/usr/local/share/gnome-shell/extensions" -type f -exec chmod 777 {} \+ 			# Sistem eklenti izinleri
        
-       chown -R $(id -un $u):$(id -gn $u) "$_dir/${GNM}/."
+       chown -R $(id -un $u):$(id -gn $u) "${GNM}/."
 
 done
 
@@ -638,16 +613,14 @@ apt-get -y install gtk2-engines-murrine gtk2-engines-pixbuf									 # Sisteme t
 
 echo "# Sistem ince ayarları yapılıyor." ; sleep 2
 
-if [ ! -d "$debmi" ]; then
-cp -r ./Tema/Genel/* /usr/share/themes/
-cp -r ./Tema/Simge/* /usr/share/icons/
-else
-cp -r /usr/share/pardusyama/Tema/Genel/* /usr/share/themes/
-cp -r /usr/share/pardusyama/Tema/Simge/* /usr/share/icons/
-fi
+cp -r "$kaynak"/Tema/Genel/* /usr/share/themes/
+cp -r "$kaynak"/Tema/Simge/* /usr/share/icons/
+
 
 gtk-update-icon-cache	"/usr/share/icons/Qogir"							 	 # Simge ön belleğini temizle
 gtk-update-icon-cache	"/usr/share/icons/Qogir-dark"							 # Simge ön belleğini temizle
+
+apt-get -y install gettext libgettextpo-dev 									 # Arc menu bağımlılığı
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e arc-menu@linxgem33.com
 
@@ -729,7 +702,7 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gno
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/nautilus/list-view/use-tree-view true
   
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/mutter/overlay-key 'Super_L'
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/mutter/overlay-key "'Super_L'"
   
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/arc-menu/application-shortcuts-list "[['Pardus Mağaza', '/usr/share/pardus/pardus-store/icon.svg', 'pardus-store.desktop'], ['Terminal', 'utilities-terminal-symbolic', 'gnome-terminal'], ['Activities Overview', 'view-fullscreen-symbolic', 'ArcMenu_ActivitiesOverview']]"
 
@@ -741,23 +714,19 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dco
   
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/privacy/remove-old-temp-files true
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/session/idle-delay uint32 "0"
-
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/desktop/interface/gtk-theme "'Qogir-win'"
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gsettings set org.gnome.shell.extensions.user-theme name "'Qogir-win'"
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gsettings set org.gnome.shell.extensions.user-theme name "'Qogir-win-dark'"
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gsettings set org.gnome.desktop.interface icon-theme "Qogir"
+
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/dash-to-panel/show-apps-icon-file "'/usr/share/icons/hicolor/scalable/emblems/emblem-pardus-white.svg'"
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/dash-to-panel/trans-panel-opacity "0.60"
 
 rm -rf /usr/share/gnome-shell/extensions/desktop-icons@csoriano/
 
 rm -rf /home/${u}/.local/share/gnome-shell/extensions/desktop-icons@csoriano/
-
-
-
-dconf update
 
 
 ;;
@@ -771,11 +740,8 @@ echo "# Windows fontları yükleniyor." ; sleep 2
 		mkdir /usr/share/fonts/truetype/msttcorefonts
 	fi
 
-	if [ ! -d "$debmi" ]; then
-		cp -r ./Fontlar/* /usr/share/fonts/truetype/msttcorefonts
-	else
-		cp -r /usr/share/pardusyama/Fontlar/* /usr/share/fonts/truetype/msttcorefonts
-	fi
+		cp -r "$kaynak"/Fontlar/* /usr/share/fonts/truetype/msttcorefonts
+
 
 	find /usr/share/fonts/truetype/msttcorefonts -type f -exec chmod 755 {} \+
 	
@@ -800,11 +766,8 @@ GFXBT=4096x2160,1920x1080,1366x768,1024x768,auto
 
   # Copy theme
 
-if [ ! -d "$debmi" ]; then
-  cp -a ./Tema/Grub/${THEME_NAME}/* ${THEME_DIR}/${THEME_NAME}
-else
-	cp -a /usr/share/pardusyama/Tema/Grub/${THEME_NAME}/* ${THEME_DIR}/${THEME_NAME}
-fi
+  cp -a "$kaynak"/Tema/Grub/${THEME_NAME}/* ${THEME_DIR}/${THEME_NAME}
+
 
   # Set theme
 
