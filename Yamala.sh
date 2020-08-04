@@ -24,7 +24,8 @@
 #  -Olmazsa olmaz bazı Gnome, XFCE eklentileri ve uygulamaları yüklenir
 #  -Grub teması daha görsel bir arayüz ile değiştirilir
 #  -Sistem ve sisemdeki tüm yazılımların güncelleştirmeleri gerçekleştirilir
-#  -Bazı uygulamalar Flatpak sürümleri ile değiştirilir  
+#  -Numlock tuşu sürekli açık halde olur.
+#  -Oracle Java yükleyebilirsiniz.
 #  -XFCE de önyüklü bazı uygulamalar Gnome eşdeğerleri ile değiştirilerek benzer arayüz sağlanır
 #  -Dosya ve yazıcı paylaşımı uygulaması (Samba, Nautilus-Shares, Thunar-Shares) yüklenir ve ayarları yapılır
 #  -Windows uygulamalarını Pardus'ta çalıştıracak uygulama (Wine) yüklenir ve ayarları yapılır
@@ -234,10 +235,11 @@ action=$(zenity --list --checklist \
 	--height 500 --width 1000 \
 	--title "İstediğiniz Yamaları Seçiniz." \
 	--column "Seçim" 	--column "Yapılacak işlem" 													--column "Açıklama" \
-			  TRUE 				 "Yazılımları ve Sistemi güncelleştir" 		   								 "Tüm yazılımlar güncelleştirilir ve bazı faydalı ek yazılımlar yüklenir. " \
+			  TRUE 				 "Yazılımları ve Sistemi güncelleştir" 		   								 "Tüm yazılımları depoda son sürüm olmasa bile güncelleştirir. " \
 			  TRUE 				 "Oyuncu araçlarını yükle" 												 	 "Steam ve Lutris yüklenerek gerekli ayarlar yapılır" \
 			  TRUE 				 "Wine yükle" 																 "Windows yazılımlarını Pardus'ta çalıştırabilmek için gereklidir" \
 			  TRUE 				 "Samba yükle ve yapılandır" 												 "Yerel ağda dosya ve yazıcı paylaşımı yapabilmek için gereklidir" \
+			  TRUE 				 "Java Yükle" 										         				 "Oracle Java SE SDK ve JRE yükler" \
 			  TRUE 				 "Betikleri ve Şablonları yükle" 											 "Sağ Tık menüsüne Yeni Belge, Masaüstü Kısayolu oluştur gibi seçenekler ekler" \
 			  TRUE 				 "XFCE ince ayarlarını yap"		 											 "XFCE arayüzünü daha modern bir hale getirir" \
 			  TRUE 				 "Fontlar yükle"															 "Ücretsiz Temel Windows fontlarını yükler" \
@@ -250,10 +252,11 @@ action=$(zenity --list --checklist \
 	--height 500 --width 975 \
 	--title "İstediğiniz Yamaları Seçiniz." \
 	--column "Seçim" 	--column "Yapılacak işlem" 													--column "Açıklama" \
-			  TRUE 				  "Yazılımları ve Sistemi güncelleştir" 		   							 "Tüm yazılımlar güncelleştirilir ve bazı faydalı ek yazılımlar yüklenir. " \
+			  TRUE 				  "Yazılımları ve Sistemi güncelleştir" 		   							 "Tüm yazılımları depoda son sürüm olmasa bile güncelleştirir. " \
 			  TRUE 				  "Oyuncu araçlarını yükle" 												 "Steam ve Lutris yüklenerek gerekli ayarlar yapılır" \
 			  TRUE 				  "Wine yükle" 																 "Windows yazılımlarını Pardus'ta çalıştırabilmek için gereklidir" \
 			  TRUE 				  "Samba yükle ve yapılandır" 												 "Yerel ağda dosya ve yazıcı paylaşımı yapabilmek için gereklidir" \
+			  TRUE 				  "Java Yükle" 										         				 "Oracle Java SE SDK ve JRE yükler" \
 			  TRUE 				  "Betikleri ve Şablonları yükle" 											 "Sağ Tık menüsüne Yeni Belge, Masaüstü Kısayolu oluştur gibi seçenekler ekler" \
 			  TRUE 				  "Gnome eklentilerini yükle ve sistem ince ayarlarını yap" 				 "Bilgisyarınıza yeni özellikler ekler" \
 			  TRUE 				  "Fontlar yükle"															 "Ücretsiz Temel Windows fontlarını yükler" \
@@ -282,22 +285,24 @@ case $word in
 echo "# Sistem güncelleştiriliyor..." ; sleep 2
 apt-get -y update && apt-get -y upgrade && apt-get -y dist-upgrade
 
-apt-get -y install ninja-build meson sassc make python3-pip    						 			 	 # Son kullanıcı olmasa da Çok kullanıcı için :)
-#apt-get -y install git
+apt-get -y install ninja-build meson sassc make python3-pip git				# Son kullanıcı olmasa da Çok kullanıcı için :)
 
-apt-get -y install ffmpeg imagemagick		# Video ve resim indirme ve düzenleme programları için gerekli uygulamaları yükle
+apt-get -y install ffmpeg imagemagick										# Video ve resim indirme ve düzenleme programları için gerekli uygulamaları yükle
 
 
 
 
 apt-get -y install numlockx                 # Açılışta otomatik olarak numlock etkinleştirmek için Lighdm, GDM, Gnome, X.org ve Xfce için ayarlar
 echo "greeter-setup-script=/usr/bin/numlockx on" >> /etc/lightdm/lightdm.conf
+echo "greeter-setup-script=/usr/bin/numlockx on" >> /usr/share/lightdm/lightdm.conf.d/50-pardus-xfce.conf
 echo "/usr/bin/numlockx on" >> /home/${u}/.xprofile
 echo "numlockx on" >> /home/${u}/.bashrc
-echo "numlockx &" >> /home/${u}/.xinitrc
+echo "numlockx &" >> /home/${u}/.xinitrc	# exec satırından önce gelmeli
 echo "setleds -D +num" >> /home/${u}/.bash_profile
 
 
+sed -i 's/^# *\(en_US.UTF-8\)/\1/' /etc/locale.gen		# Sisteme İngilizce dilini ekler. (Bazı uygulamar için gerekli olabiliyor)
+locale-gen
 
 
 # Firefox özelliklerini gelecekte ayarlamak için saklayalım.
@@ -329,17 +334,16 @@ echo "setleds -D +num" >> /home/${u}/.bash_profile
 
 echo "# Yerel yazılımlar yükleniyor." ; sleep 2
 
+#Libreoffice son sürüm yükle
+#wget -P "$kaynak"/Yazılımlar/ https://www.libreoffice.org/donate/dl/deb-x86_64/6.4.5/tr/LibreOffice_6.4.5_Linux_x86-64_deb.tar.gz 2>&1 | sed -u 's/.* \([0-9]\+%\)\ \+\([0-9.]\+.\) \(.*\)/\1\n# İndirme Hızı \2\/s, Kalan zaman \3/' | zenity --progress --title "İndirme İşlemi" --text "Libreoffice indiriliyor..." --no-cancel --auto-close --pulsate
+#sudo tar xjf LibreOffice_6.4.5_Linux_x86-64_deb.tar.gz
+
 apt-get install -y gir1.2-flatpak-1.0
 
 dpkg -R --install "$kaynak"/Yazılımlar/
 
 apt-get -fy install
-
-
-echo "# Kalıntılar temizleniyor." ; sleep 2
-
-apt-get -y autoremove
-apt-get -y clean				
+		
 
 ;;
 "Oyuncu"*)  		# Oyuncu araçları Yüklemesi ===========================================================================
@@ -347,14 +351,16 @@ apt-get -y clean
 
 echo "# Oyuncu araçları yükleniyor." ; sleep 2
 
-# flatpak install flathub com.valvesoftware.Steam  #Flatpak runtime sürümü depoda eski, bu eski sürümde de Nvidia-Steam sorunlu. O yüzden depoda Flatpak güncellenene kadar deb sürümü yükleyeceğiz. 
 
-cd "$kaynak"/Oyuncu
+wget -P "$kaynak/Oyuncu/" https://steamcdn-a.akamaihd.net/client/installer/steam.deb 2>&1 | sed -u 's/.* \([0-9]\+%\)\ \+\([0-9.]\+.\) \(.*\)/\1\n# İndirme Hızı \2\/s, Kalan zaman \3/' | zenity --progress --title "İndirme İşlemi" --text "Steam indiriliyor..." --no-cancel --auto-close --pulsate
 
-wget https://steamcdn-a.akamaihd.net/client/installer/steam.deb 2>&1 | sed -u 's/.* \([0-9]\+%\)\ \+\([0-9.]\+.\) \(.*\)/\1\n# İndirme Hızı \2\/s, Kalan zaman \3/' | zenity --progress --title "İndirme İşlemi" --text "Steam indiriliyor..." --no-cancel --auto-close --pulsate
-chmod 777 steam*.deb
-cd ..
 
+echo "deb http://download.opensuse.org/repositories/home:/strycore/Debian_10/ ./" | sudo tee /etc/apt/sources.list.d/lutris.list
+wget -q https://download.opensuse.org/repositories/home:/strycore/Debian_10/Release.key -O- | sudo apt-key add -
+sudo apt-get -y update
+sudo apt-get -y install lutris
+
+chmod 777 "$kaynak"/Oyuncu/*.deb
 dpkg -R --install "$kaynak"/Oyuncu/
 apt-get -fy install
 
@@ -407,6 +413,18 @@ chown -R $(id -un ${u}):$(id -gn ${u}) "/var/lib/samba/usershares"
 
 
 systemctl restart smbd.service
+
+
+;;
+"Java"*)  # Oracle Java SE Runtime Yükleme ============================================================================================
+
+echo "deb http://ppa.launchpad.net/linuxuprising/java/ubuntu focal main" | tee /etc/apt/sources.list.d/linuxuprising-java.list
+
+apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 73C3DB2A
+
+apt-get -y update
+
+apt-get -y install oracle-java14-installer
 
 
 ;;
@@ -662,7 +680,7 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dco
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/window-switcher/app-icon-mode "'both'"
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e add-on-desktop@maestroschan.fr
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e add-to-desktop@tommimon.github.com
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gnome-shell-extension-tool -e appfolders-manager@maestroschan.fr
 
@@ -793,12 +811,16 @@ done					#  Kullanıcı bazlı komutlar girişini kapat
 
 # # # # # # # # # # # # # # # # # # # # # # #  # # # # # # # # # # # # # # # # # # # # # # # 
 
+echo "# Kalıntılar temizleniyor." ; sleep 2
+
+apt-get -y autoremove
+apt-get -y clean	
 
 # İşlem tamamlanmıştır
 
 notify-send -t 8000 -i /usr/share/icons/gnome/32x32/status/info.png "İşlem Tamamlanmıştır."
 
-zenity --title "Yükleme Tamamlandı" --width 400 --question --text="Değişikliklerin etkili olabilmesi için bilgisayarınızı yeniden başlatmalısınız.\n \nŞimdi yeniden başlatmak ister misiniz ?"
+zenity --title "Yükleme Tamamlandı" --width 400 --question --text="Bazı değişikliklerin etkin olabilmesi için bilgisayarınızı yeniden başlatmanız gerekebilir.\n \nŞimdi yeniden başlatmak ister misiniz ?"
 if [ $? = 0 ]; then
     /sbin/reboot
 
