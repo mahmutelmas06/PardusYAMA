@@ -49,6 +49,8 @@ if [[ "$EUID" != "0" ]]; then
 	echo -e "\nBu betik Yönetici Hakları ile çalıştırılmalıdır. Lütfen Şifrenizi giriniz...\n"
 	sudo "bash" "$0" "$@" ; exit 0
 else
+	apt-get install -y neofetch
+	clear
 	echo "Yönetici hakları doğrulandı..."
 fi
 
@@ -178,6 +180,8 @@ fi
 
 #==============================================================================	    	
 
+neofetch
+
 ( 	  # Zenity yükleme göstergesi başlangıç
 echo "# Öyükleme işlemi başlatılıyor." ; sleep 2		
 
@@ -192,7 +196,7 @@ rm /var/lib/apt/lists/lock
 rm /var/cache/apt/archives/lock
 dpkg --configure -a
 apt-get install -fy
-apt-get update -y
+apt-get update
 
 
 
@@ -283,7 +287,7 @@ case $word in
 
 
 echo "# Sistem güncelleştiriliyor..." ; sleep 2
-apt-get -y update && apt-get -y upgrade && apt-get -y dist-upgrade
+apt-get update && apt-get -y upgrade && apt-get -y dist-upgrade
 
 apt-get -y install ninja-build meson sassc make python3-pip git				# Son kullanıcı olmasa da Çok kullanıcı için :)
 
@@ -334,11 +338,12 @@ locale-gen
 
 echo "# Yerel yazılımlar yükleniyor." ; sleep 2
 
-#Libreoffice son sürüm yükle
-#wget -P "$kaynak"/Yazılımlar/ https://www.libreoffice.org/donate/dl/deb-x86_64/6.4.5/tr/LibreOffice_6.4.5_Linux_x86-64_deb.tar.gz 2>&1 | sed -u 's/.* \([0-9]\+%\)\ \+\([0-9.]\+.\) \(.*\)/\1\n# İndirme Hızı \2\/s, Kalan zaman \3/' | zenity --progress --title "İndirme İşlemi" --text "Libreoffice indiriliyor..." --no-cancel --auto-close --pulsate
-#sudo tar xjf LibreOffice_6.4.5_Linux_x86-64_deb.tar.gz
 
+# Flatpak yöneticisinin ön uygulaması
 apt-get install -y gir1.2-flatpak-1.0
+
+# Klasörden yüklenecekler
+
 
 dpkg -R --install "$kaynak"/Yazılımlar/
 
@@ -351,18 +356,30 @@ apt-get -fy install
 
 echo "# Oyuncu araçları yükleniyor." ; sleep 2
 
+# Steam Yüklemesi
 
-wget -P "$kaynak/Oyuncu/" https://steamcdn-a.akamaihd.net/client/installer/steam.deb 2>&1 | sed -u 's/.* \([0-9]\+%\)\ \+\([0-9.]\+.\) \(.*\)/\1\n# İndirme Hızı \2\/s, Kalan zaman \3/' | zenity --progress --title "İndirme İşlemi" --text "Steam indiriliyor..." --no-cancel --auto-close --pulsate
+tee /etc/apt/sources.list.d/steam.list <<'EOF'
+deb [arch=amd64,i386] http://repo.steampowered.com/steam/ precise steam
+deb-src [arch=amd64,i386] http://repo.steampowered.com/steam/ precise steam
+EOF
+
+wget -P /etc/apt/trusted.gpg.d/ http://repo.steampowered.com/steam/archive/precise/steam.gpg
+apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F24AEA9FB05498B7
+
+  apt-get update \
+  apt-get -y install \
+  libgl1-mesa-dri:amd64 \
+  libgl1-mesa-dri:i386 \
+  libgl1-mesa-glx:amd64 \
+  libgl1-mesa-glx:i386 \
+  steam-launcher
 
 
-echo "deb http://download.opensuse.org/repositories/home:/strycore/Debian_10/ ./" | sudo tee /etc/apt/sources.list.d/lutris.list
-wget -q https://download.opensuse.org/repositories/home:/strycore/Debian_10/Release.key -O- | sudo apt-key add -
-sudo apt-get -y update
+# Lutris Yüklemesi
+echo "deb http://download.opensuse.org/repositories/home:/strycore/Debian_10/ ./" | tee /etc/apt/sources.list.d/lutris.list
+wget -q https://download.opensuse.org/repositories/home:/strycore/Debian_10/Release.key -O- | apt-key add -
+sudo apt-get update
 sudo apt-get -y install lutris
-
-chmod 777 "$kaynak"/Oyuncu/*.deb
-dpkg -R --install "$kaynak"/Oyuncu/
-apt-get -fy install
 
 #lutris --reinstall epic-games-store
 #lutris --reinstall origin
@@ -418,13 +435,7 @@ systemctl restart smbd.service
 ;;
 "Java"*)  # Oracle Java SE Runtime Yükleme ============================================================================================
 
-echo "deb http://ppa.launchpad.net/linuxuprising/java/ubuntu focal main" | tee /etc/apt/sources.list.d/linuxuprising-java.list
-
-apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 73C3DB2A
-
-apt-get -y update
-
-apt-get -y install oracle-java14-installer
+echo "# Java yüklemesi gelecek sürümde aktif olacaktır..." ; sleep 2
 
 
 ;;
