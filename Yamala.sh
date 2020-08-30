@@ -5,7 +5,7 @@
 #  Yazar         : MAHMUT ELMAS
 #  İndirme Linki : https://github.com/mahmutelmas06/PardusYAMA
 #  İletişim      : mahmutelmas06@gmail.com
-#  Sürüm         : 0.7
+#  Sürüm         : 0.8
 #  Bağımlıkıklar : zenity apt wget
 #  Lisans        : MIT - Bazı eklentilerin kendi lisansları bulunmaktadır
 #
@@ -33,6 +33,7 @@
 #  -Ücretsiz Windows fontları yüklenir
 #  -Başlat menüsü eklenir (Gnome Arc Menu)
 #  -Hem simge teması hem sistem teması Qogir-win olarak ayarlanır
+#  -Pardus deneysel ve Pardus backports depolarını ekleme seçeneği
 
 
 
@@ -339,11 +340,15 @@ locale-gen
 echo "# Yerel yazılımlar yükleniyor." ; sleep 2
 
 
-# Flatpak yöneticisinin ön uygulaması
-apt-get install -y gir1.2-flatpak-1.0
+
 
 # Klasörden yüklenecekler
 
+
+# Flatpak yöneticisinin ön uygulaması ve Flatpak Yöneticisi
+apt-get install -y gir1.2-flatpak-1.0
+
+wget -P ./Yazılımlar/ https://github.com/eersoy93/pardus-flatpak-gui/releases/download/0.4.0/pardus-flatpak-gui_0.4.0_all.deb 2>&1 | sed -u 's/.* \([0-9]\+%\)\ \+\([0-9.]\+.\) \(.*\)/\1\n# İndirme Hızı \2\/s, Kalan zaman \3/' | zenity --progress --title "İndirme İşlemi" --text "FlatpakGui indiriliyor..." --no-cancel --auto-close --pulsate
 
 dpkg -R --install "$kaynak"/Yazılımlar/
 
@@ -435,9 +440,9 @@ systemctl restart smbd.service
 
 echo "# Pardus Deneysel ve Backports depolarını sisteme ekler..." ; sleep 2
 
-echo "deb http://19.depo.pardus.org.tr/backports ondokuz-backports main contrib non-free"  | tee /etc/apt/sources.list
+#echo "deb http://19.depo.pardus.org.tr/backports ondokuz-backports main contrib non-free"  | tee /etc/apt/sources.list
 
-echo "deb http://19.depo.pardus.org.tr/deneysel ondokuz main" | tee -a /etc/apt/sources.list
+#echo "deb http://19.depo.pardus.org.tr/deneysel ondokuz main" | tee -a /etc/apt/sources.list
 
 apt-get update
 
@@ -467,7 +472,7 @@ _FILESS=""$kaynak"/Şablonlar/*"
 		source "$_dir"/.config/user-dirs.dirs
 		if [[ $XDG_Templates_DIR = "$_dir/${SAB}" ]]
 		then
-		echo "Herşey hazır durumda. Çıkılıyor.."
+		echo "Herşey hazır durumda."
 		fi
 
 	fi
