@@ -182,9 +182,9 @@ fi
 
 neofetch
 
-( 	  # Zenity yükleme göstergesi başlangıç
-echo "# Öyükleme işlemi başlatılıyor." ; sleep 2		
 
+( 	  # Zenity yükleme göstergesi başlangıç
+echo "# Öyükleme işlemi başlatılıyor." ; sleep 2
 
 
 # -----  Yüklemeye hazırlık aşamaları  ------------
@@ -243,7 +243,7 @@ action=$(zenity --list --checklist \
 			  TRUE 				 "Oyuncu araçlarını yükle" 												 	 "Steam ve Lutris yüklenerek gerekli ayarlar yapılır" \
 			  TRUE 				 "Wine yükle" 																 "Windows yazılımlarını Pardus'ta çalıştırabilmek için gereklidir" \
 			  TRUE 				 "Samba yükle ve yapılandır" 												 "Yerel ağda dosya ve yazıcı paylaşımı yapabilmek için gereklidir" \
-			  TRUE 				 "Java Yükle" 										         				 "Oracle Java SE SDK ve JRE yükler" \
+			  TRUE 				 "Depo Ekle" 										         				 "Pardus Deneysel ve Backports depolarını sisteme ekler" \
 			  TRUE 				 "Betikleri ve Şablonları yükle" 											 "Sağ Tık menüsüne Yeni Belge, Masaüstü Kısayolu oluştur gibi seçenekler ekler" \
 			  TRUE 				 "XFCE ince ayarlarını yap"		 											 "XFCE arayüzünü daha modern bir hale getirir" \
 			  TRUE 				 "Fontlar yükle"															 "Ücretsiz Temel Windows fontlarını yükler" \
@@ -260,7 +260,7 @@ action=$(zenity --list --checklist \
 			  TRUE 				  "Oyuncu araçlarını yükle" 												 "Steam ve Lutris yüklenerek gerekli ayarlar yapılır" \
 			  TRUE 				  "Wine yükle" 																 "Windows yazılımlarını Pardus'ta çalıştırabilmek için gereklidir" \
 			  TRUE 				  "Samba yükle ve yapılandır" 												 "Yerel ağda dosya ve yazıcı paylaşımı yapabilmek için gereklidir" \
-			  TRUE 				  "Java Yükle" 										         				 "Oracle Java SE SDK ve JRE yükler" \
+			  TRUE 				  "Depo Ekle" 										         				 "Pardus Deneysel ve Backports depolarını sisteme ekler" \
 			  TRUE 				  "Betikleri ve Şablonları yükle" 											 "Sağ Tık menüsüne Yeni Belge, Masaüstü Kısayolu oluştur gibi seçenekler ekler" \
 			  TRUE 				  "Gnome eklentilerini yükle ve sistem ince ayarlarını yap" 				 "Bilgisyarınıza yeni özellikler ekler" \
 			  TRUE 				  "Fontlar yükle"															 "Ücretsiz Temel Windows fontlarını yükler" \
@@ -433,10 +433,15 @@ systemctl restart smbd.service
 
 
 ;;
-"Java"*)  # Oracle Java SE Runtime Yükleme ============================================================================================
+"Depo"*)  # Pardus Deneysel ve Backports depoları Yükleme ============================================================================================
 
-echo "# Java yüklemesi gelecek sürümde aktif olacaktır..." ; sleep 2
+echo "# Pardus Deneysel ve Backports depolarını sisteme ekler..." ; sleep 2
 
+echo "deb http://19.depo.pardus.org.tr/backports ondokuz-backports main contrib non-free"  | tee /etc/apt/sources.list
+
+echo "deb http://19.depo.pardus.org.tr/deneysel ondokuz main" | tee -a /etc/apt/sources.list
+
+apt-get update
 
 ;;
 "Betikleri"*)  # Betikleri ve Şablonları Yükle ============================================================================================
@@ -589,15 +594,16 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfc
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c thunar -p /actions/action-3/command -t string --create -s "exo-open --launch WebBrowser www.vuhuv.com.tr/%s"
 
-echo "#pulseaudio-button * { -gtk-icon-transform: scale(0.6); }" >> /home/${u}/.config/gtk-3.0/gtk.css
 
-  
+
+echo "#pulseaudio-button * { -gtk-icon-transform: scale(0.6); }" | tee -a /home/${u}/.config/gtk-3.0/gtk.css
+
 rm /home/${u}/.config/gtk-3.0/bookmarks
-echo "file:///home/"${u}"/İndirilenler" >> /home/${u}/.config/gtk-3.0/bookmarks
-echo "file:///home/"${u}"/Belgeler" >> /home/${u}/.config/gtk-3.0/bookmarks
-echo "file:///home/"${u}"/Resimler" >> /home/${u}/.config/gtk-3.0/bookmarks
-echo "file:///home/"${u}"/Müzik" >> /home/${u}/.config/gtk-3.0/bookmarks
-echo "file:///home/"${u}"/Videolar" >> /home/${u}/.config/gtk-3.0/bookmarks
+echo "file:///home/"${u}"/İndirilenler" | tee /home/${u}/.config/gtk-3.0/bookmarks
+echo "file:///home/"${u}"/Belgeler" | tee -a /home/${u}/.config/gtk-3.0/bookmarks
+echo "file:///home/"${u}"/Resimler" | tee -a /home/${u}/.config/gtk-3.0/bookmarks
+echo "file:///home/"${u}"/Müzik" | tee -a /home/${u}/.config/gtk-3.0/bookmarks
+echo "file:///home/"${u}"/Videolar" | tee -a /home/${u}/.config/gtk-3.0/bookmarks
 
 
 
