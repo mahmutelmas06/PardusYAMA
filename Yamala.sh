@@ -358,28 +358,26 @@ echo "# Oyuncu araçları yükleniyor." ; sleep 2
 
 # Steam Yüklemesi
 
-tee /etc/apt/sources.list.d/steam.list <<'EOF'
-deb [arch=amd64,i386] http://repo.steampowered.com/steam/ precise steam
-deb-src [arch=amd64,i386] http://repo.steampowered.com/steam/ precise steam
-EOF
+wget -P ./Oyuncu/ https://steamcdn-a.akamaihd.net/client/installer/steam.deb 2>&1 | sed -u 's/.* \([0-9]\+%\)\ \+\([0-9.]\+.\) \(.*\)/\1\n# İndirme Hızı \2\/s, Kalan zaman \3/' | zenity --progress --title "İndirme İşlemi" --text "Steam indiriliyor..." --no-cancel --auto-close --pulsate
 
-wget -P /etc/apt/trusted.gpg.d/ http://repo.steampowered.com/steam/archive/precise/steam.gpg
-apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F24AEA9FB05498B7
+chmod 777 ./Oyuncu/*.deb
 
-  apt-get update \
-  apt-get -y install \
-  libgl1-mesa-dri:amd64 \
-  libgl1-mesa-dri:i386 \
-  libgl1-mesa-glx:amd64 \
-  libgl1-mesa-glx:i386 \
-  steam-launcher
+dpkg -R --install ./Oyuncu
+apt-get -fy install
+
+apt-get -y install \
+libgl1-mesa-dri:amd64 \
+libgl1-mesa-dri:i386 \
+libgl1-mesa-glx:amd64 \
+libgl1-mesa-glx:i386 \
+steam-launcher
 
 
 # Lutris Yüklemesi
 echo "deb http://download.opensuse.org/repositories/home:/strycore/Debian_10/ ./" | tee /etc/apt/sources.list.d/lutris.list
 wget -q https://download.opensuse.org/repositories/home:/strycore/Debian_10/Release.key -O- | apt-key add -
-sudo apt-get update
-sudo apt-get -y install lutris
+apt-get update
+apt-get -y install lutris
 
 #lutris --reinstall epic-games-store
 #lutris --reinstall origin
