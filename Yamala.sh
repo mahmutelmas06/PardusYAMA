@@ -5,7 +5,7 @@
 #  Yazar         : MAHMUT ELMAS
 #  İndirme Linki : https://github.com/mahmutelmas06/PardusYAMA
 #  İletişim      : mahmutelmas06@gmail.com
-#  Sürüm         : 0.8
+#  Sürüm         : 0.8.1
 #  Bağımlıkıklar : zenity apt wget
 #  Lisans        : MIT - Bazı eklentilerin kendi lisansları bulunmaktadır
 #
@@ -32,7 +32,6 @@
 #  -Masaüstü sürükle bırak desteği eklenir (Gnome)
 #  -Ücretsiz Windows fontları yüklenir
 #  -Başlat menüsü eklenir (Gnome Arc Menu)
-#  -Hem simge teması hem sistem teması Qogir-win olarak ayarlanır
 #  -Pardus deneysel ve Pardus backports depolarını ekleme seçeneği
 
 
@@ -62,12 +61,19 @@ fi
 NEYUKLU=$(dpkg -l | grep -E '^ii' | awk '{print $2}' | tail -n+5)			   
 
 
-#==============================================================================  Zenity kontrolü
+#==============================================================================  Zenity ve Wget kontrolü
 
 if [[ -z "$(grep -F ' zenity ' <<< ${NEYUKLU[@]})" ]]; then
 
   echo "# Zenity bulunamadı ve yükleniyor..."
   apt-get install -y zenity
+  
+fi
+
+if [[ -z "$(grep -F ' wget ' <<< ${NEYUKLU[@]})" ]]; then
+
+  echo "# Wget bulunamadı ve yükleniyor..."
+  apt-get install -y wget
   
 fi
 
@@ -170,7 +176,7 @@ debmi="/usr/share/pardusyama"
 if [ -d "$debmi" ]; then
 
 kaynak="/usr/share/pardusyama"
-echo "Pardusyama Deb paketi sürümü çalışıyor. Betik sürümünü kullanmak isterseniz sistemden deb paketini kaldırmalısınız."
+echo "Pardusyama Deb paketi sürümü çalışıyor. Betik sürümünü kullanmak isterseniz sistemden deb paketini kaldırmalısınız. Aksi halde betik sürümünü başlatsanız bile sistemde yüklü olan deb sürümü çalışacaktır."
 
 else
 
@@ -196,6 +202,8 @@ echo "# Varsa APT sorunları çözülüyor..." ; sleep 2
 rm /var/lib/apt/lists/lock
 rm /var/cache/apt/archives/lock
 dpkg --configure -a
+sudo apt-get update --fix-missing
+sudo apt-get --fix-broken install
 apt-get install -fy
 apt-get update
 
@@ -213,11 +221,31 @@ echo "# Flatpak uygulaması ve Flathub deposu denetleniyor..." ; sleep 2
 
 if [[ -z "$(grep -F ' flatpak ' <<< ${NEYUKLU[@]})" ]]; then
 
-apt-get -y install flatpak                                                            
+# Flatpak
+apt-get -y install flatpak
+
+# Flatpak Depoları                                                            
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 flatpak remote-add --if-not-exists winepak https://dl.winepak.org/repo/winepak.flatpakrepo
 
+# Flatpak Yöneticisi
+
+wget -P ./Yazılımlar/ https://github.com/eersoy93/pardus-flatpak-gui/releases/download/0.4.0/pardus-flatpak-gui_0.4.0_all.deb 2>&1 | sed -u 's/.* \([0-9]\+%\)\ \+\([0-9.]\+.\) \(.*\)/\1\n# İndirme Hızı \2\/s, Kalan zaman \3/' | zenity --progress --title "İndirme İşlemi" --text "FlatpakGui indiriliyor..." --no-cancel --auto-close --pulsate
+dpkg -R --install "$kaynak"/Yazılımlar/
+apt-get -fy install
+
 fi
+
+echo "# Sistem temalarının düzgün çalışması için gereken bağımlılıklar denetleniyor..." ; sleep 2	
+
+apt-get -y install gtk2-engines-murrine gtk2-engines-pixbuf				    # Bu uygulamalar olmadan birçok sistem teması çalışmayacaktır.
+
+
+echo "# Sistemin İngilizce dil desteği denetleniyor..." ; sleep 2	
+
+sed -i 's/^# *\(en_US.UTF-8\)/\1/' /etc/locale.gen		# Sisteme İngilizce dilini ekler. (Bazı uygulamar için gerekli olabiliyor)
+locale-gen
+
 
 echo "# Önyükleme tamamlandı. \n \nYükleme için kullanıcı seçimine geçiliyor..." ; sleep 2
 
@@ -240,11 +268,12 @@ action=$(zenity --list --checklist \
 	--height 500 --width 1000 \
 	--title "İstediğiniz Yamaları Seçiniz." \
 	--column "Seçim" 	--column "Yapılacak işlem" 													--column "Açıklama" \
-			  TRUE 				 "Yazılımları ve Sistemi güncelleştir" 		   								 "Tüm yazılımları depoda son sürüm olmasa bile güncelleştirir. " \
-			  TRUE 				 "Oyuncu araçlarını yükle" 												 	 "Steam ve Lutris yüklenerek gerekli ayarlar yapılır" \
-			  TRUE 				 "Wine yükle" 																 "Windows yazılımlarını Pardus'ta çalıştırabilmek için gereklidir" \
+			  TRUE 				 "Numlock tuşları açılışta etkin olsun" 		   							 "Bilgisayarınız, klavye sağ taraftaki rakamlar çalışır halde açılır. " \
+			  TRUE 				 "Bazı yazılımları yükle ve sistemi güncelleştir" 		   					 "Sistemdeki yazılımlar güncelleştirilir. Make, Ffmpeg, pip, git vb. yüklenir." \
+			  TRUE 				 "Steam yükle" 												 	 			 "Steam yüklenerek gerekli ayarlar yapılır" \
+			  TRUE 				 "Wine ve Lutris yükle" 													 "Windows yazılım ve oyunlarını Pardus'ta çalıştırabilmek için gereklidir" \
 			  TRUE 				 "Samba yükle ve yapılandır" 												 "Yerel ağda dosya ve yazıcı paylaşımı yapabilmek için gereklidir" \
-			  TRUE 				 "Depo Ekle" 										         				 "Pardus Deneysel ve Backports depolarını sisteme ekler" \
+			  TRUE 				 "Depo Ekle" 										         				 "Pardus Backports deposunu sisteme ekler" \
 			  TRUE 				 "Betikleri ve Şablonları yükle" 											 "Sağ Tık menüsüne Yeni Belge, Masaüstü Kısayolu oluştur gibi seçenekler ekler" \
 			  TRUE 				 "XFCE ince ayarlarını yap"		 											 "XFCE arayüzünü daha modern bir hale getirir" \
 			  TRUE 				 "Fontlar yükle"															 "Ücretsiz Temel Windows fontlarını yükler" \
@@ -257,11 +286,12 @@ action=$(zenity --list --checklist \
 	--height 500 --width 975 \
 	--title "İstediğiniz Yamaları Seçiniz." \
 	--column "Seçim" 	--column "Yapılacak işlem" 													--column "Açıklama" \
-			  TRUE 				  "Yazılımları ve Sistemi güncelleştir" 		   							 "Tüm yazılımları depoda son sürüm olmasa bile güncelleştirir. " \
-			  TRUE 				  "Oyuncu araçlarını yükle" 												 "Steam ve Lutris yüklenerek gerekli ayarlar yapılır" \
-			  TRUE 				  "Wine yükle" 																 "Windows yazılımlarını Pardus'ta çalıştırabilmek için gereklidir" \
+			  TRUE 				  "Numlock tuşları açılışta etkin olsun" 		   							 "Bilgisayarınız, klavye sağ taraftaki rakamlar çalışır halde açılır. " \
+			  TRUE 				  "Bazı yazılımları yükle ve sistemi güncelleştir" 		   					 "Sistemdeki yazılımlar güncelleştirilir. Make, Ffmpeg, pip, git vb. yüklenir." \
+			  TRUE 				  "Steam yükle" 												 			 "Steam yüklenerek gerekli ayarlar yapılır" \
+			  TRUE 				  "Wine ve Lutris yükle" 													 "Windows yazılımlarını ve oyunlarını Pardus'ta çalıştırabilmek için gereklidir" \
 			  TRUE 				  "Samba yükle ve yapılandır" 												 "Yerel ağda dosya ve yazıcı paylaşımı yapabilmek için gereklidir" \
-			  TRUE 				  "Depo Ekle" 										         				 "Pardus Deneysel ve Backports depolarını sisteme ekler" \
+			  TRUE 				  "Depo Ekle" 										         				 "Pardus Backports deposunu sisteme ekler" \
 			  TRUE 				  "Betikleri ve Şablonları yükle" 											 "Sağ Tık menüsüne Yeni Belge, Masaüstü Kısayolu oluştur gibi seçenekler ekler" \
 			  TRUE 				  "Gnome eklentilerini yükle ve sistem ince ayarlarını yap" 				 "Bilgisyarınıza yeni özellikler ekler" \
 			  TRUE 				  "Fontlar yükle"															 "Ücretsiz Temel Windows fontlarını yükler" \
@@ -283,21 +313,14 @@ case $word in
 #==============================================================================
 
 
-"Yazılımları"*)              				# Bazı uygulamaların kaldırılması ve yenilerinin yüklenmesi =======================
+"Numlock"*)              				# Numlock etkin gelsin =======================
 
 
 
-echo "# Sistem güncelleştiriliyor..." ; sleep 2
-apt-get update && apt-get -y upgrade && apt-get -y dist-upgrade
-
-apt-get -y install ninja-build meson sassc make python3-pip git				# Son kullanıcı olmasa da Çok kullanıcı için :)
-
-apt-get -y install ffmpeg imagemagick										# Video ve resim indirme ve düzenleme programları için gerekli uygulamaları yükle
-
-
-
+echo "# Numlock ayarları yapılıyor..." ; sleep 2
 
 apt-get -y install numlockx                 # Açılışta otomatik olarak numlock etkinleştirmek için Lighdm, GDM, Gnome, X.org ve Xfce için ayarlar
+
 echo "greeter-setup-script=/usr/bin/numlockx on" >> /etc/lightdm/lightdm.conf
 echo "greeter-setup-script=/usr/bin/numlockx on" >> /usr/share/lightdm/lightdm.conf.d/50-pardus-xfce.conf
 echo "/usr/bin/numlockx on" >> /home/${u}/.xprofile
@@ -305,9 +328,16 @@ echo "numlockx on" >> /home/${u}/.bashrc
 echo "numlockx &" >> /home/${u}/.xinitrc	# exec satırından önce gelmeli
 echo "setleds -D +num" >> /home/${u}/.bash_profile
 
+;;
+"Bazı"*)              						  	# Bazı uygulamaların yüklenmesi =======================
 
-sed -i 's/^# *\(en_US.UTF-8\)/\1/' /etc/locale.gen		# Sisteme İngilizce dilini ekler. (Bazı uygulamar için gerekli olabiliyor)
-locale-gen
+echo "# Sistem güncelleştiriliyor ve bazı uygulamalar yükleniyor..." ; sleep 2
+
+apt-get update && apt-get -y upgrade && apt-get -y dist-upgrade
+
+apt-get -y install ninja-build meson sassc make python3-pip git				# Son kullanıcı olmasa da Çok kullanıcı için :)
+
+apt-get -y install ffmpeg imagemagick										# Video ve resim indirme ve düzenleme programları için gerekli uygulamalar
 
 
 # Firefox özelliklerini gelecekte ayarlamak için saklayalım.
@@ -337,29 +367,13 @@ locale-gen
 #user_pref("toolkit.telemetry.cachedClientID", "c0ffeec0-ffee-c0ff-eec0-ffeec0ffeec0");
 
 
-echo "# Yerel yazılımlar yükleniyor." ; sleep 2
-
-
-
-
-# Klasörden yüklenecekler
-
-
-# Flatpak yöneticisinin ön uygulaması ve Flatpak Yöneticisi
-apt-get install -y gir1.2-flatpak-1.0
-
-wget -P ./Yazılımlar/ https://github.com/eersoy93/pardus-flatpak-gui/releases/download/0.4.0/pardus-flatpak-gui_0.4.0_all.deb 2>&1 | sed -u 's/.* \([0-9]\+%\)\ \+\([0-9.]\+.\) \(.*\)/\1\n# İndirme Hızı \2\/s, Kalan zaman \3/' | zenity --progress --title "İndirme İşlemi" --text "FlatpakGui indiriliyor..." --no-cancel --auto-close --pulsate
-
-dpkg -R --install "$kaynak"/Yazılımlar/
-
-apt-get -fy install
 		
 
 ;;
-"Oyuncu"*)  		# Oyuncu araçları Yüklemesi ===========================================================================
+"Steam"*)  		# Oyuncu araçları Yüklemesi ===========================================================================
 
 
-echo "# Oyuncu araçları yükleniyor." ; sleep 2
+echo "# Steam yükleniyor." ; sleep 2
 
 # Steam Yüklemesi
 
@@ -377,20 +391,9 @@ libgl1-mesa-glx:amd64 \
 libgl1-mesa-glx:i386 \
 steam-launcher
 
-
-# Lutris Yüklemesi
-echo "deb http://download.opensuse.org/repositories/home:/strycore/Debian_10/ ./" | tee /etc/apt/sources.list.d/lutris.list
-wget -q https://download.opensuse.org/repositories/home:/strycore/Debian_10/Release.key -O- | apt-key add -
-apt-get update
-apt-get -y install lutris
-
-#lutris --reinstall epic-games-store
-#lutris --reinstall origin
-#lutris --reinstall gog-galaxy
-#lutris --reinstall rockstar-games-launcher
-
-#lutris --reinstall battlenet
-#apt-get install -y libgnutls30:i386 libldap-2.4-2:i386 libgpg-error0:i386 libsqlite3-0:i386
+if [ "$desktop" == "xfce" ] ; then
+apt-get -y install xterm
+fi
 
 
 
@@ -408,6 +411,21 @@ winetricks -q directx9 dotnet40 corefonts ie8 vcrun2005 vcrun2008 vcrun2010 vcru
 apt-get -y install libvulkan1 libvulkan1:i386 libvulkan-dev vulkan-utils mesa-vulkan-drivers libgl1:i386
 
 
+
+
+# Lutris Yüklemesi
+echo "deb http://download.opensuse.org/repositories/home:/strycore/Debian_10/ ./" | tee /etc/apt/sources.list.d/lutris.list
+wget -q https://download.opensuse.org/repositories/home:/strycore/Debian_10/Release.key -O- | apt-key add -
+apt-get update
+apt-get -y install lutris
+
+#lutris --reinstall epic-games-store
+#lutris --reinstall origin
+#lutris --reinstall gog-galaxy
+#lutris --reinstall rockstar-games-launcher
+
+#lutris --reinstall battlenet
+#apt-get install -y libgnutls30:i386 libldap-2.4-2:i386 libgpg-error0:i386 libsqlite3-0:i386
 
 ;;
 "Samba"*)  		# Samba Yüklemesi =========================================================================================
@@ -440,7 +458,7 @@ systemctl restart smbd.service
 
 echo "# Pardus Deneysel ve Backports depolarını sisteme ekler..." ; sleep 2
 
-#echo "deb http://19.depo.pardus.org.tr/backports ondokuz-backports main contrib non-free"  | tee /etc/apt/sources.list
+echo "deb http://19.depo.pardus.org.tr/backports ondokuz-backports main contrib non-free"  | tee /etc/apt/sources.list
 
 #echo "deb http://19.depo.pardus.org.tr/deneysel ondokuz main" | tee -a /etc/apt/sources.list
 
@@ -508,17 +526,15 @@ done
 
 killall xfconfd
 
-apt-get -y install gtk2-engines-murrine gtk2-engines-pixbuf									 # Sisteme tema eklerken istenen bağımlılıklar
-
 #dpkg -R --install ./Xfce/deb
 #apt-get -fy install
 
 cp -r "$kaynak"/Tema/Genel/* /usr/share/themes/
-cp -r "$kaynak"/Tema/Simge/* /usr/share/icons/
 
 
-gtk-update-icon-cache	"/usr/share/icons/Qogir/"							 	 # Simge ön belleğini temizle
-gtk-update-icon-cache	"/usr/share/icons/Qogir-dark/"							 # Simge ön belleğini temizle
+#cp -r "$kaynak"/Tema/Simge/* /usr/share/icons/
+#gtk-update-icon-cache	"/usr/share/icons/Qogir/"							 	 # Simge ön belleğini temizle
+#gtk-update-icon-cache	"/usr/share/icons/Qogir-dark/"							 # Simge ön belleğini temizle
 
 _FILESX=""$kaynak"/Xfce/.config/."
 
@@ -563,17 +579,17 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfc
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-panel -p /plugins/plugin-11 --create -t string -s launcher
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/theme -t string --create -s Qogir-win
-
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/frame_opacity -t int --create -s 94
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/inactive_opacity -t int --create -s 96
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/title_font -t string -s "Sans Bold 11"
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xsettings -p /Net/ThemeName -t string -s Qogir-win
+sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfwm4 -p /general/theme -t string --create -s Qogir-win
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xsettings -p /Net/IconThemeName -t string -s Qogir
+#sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xsettings -p /Net/ThemeName -t string -s Qogir-win
+
+#sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xsettings -p /Net/IconThemeName -t string -s Qogir
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" xfconf-query -c xfce4-desktop -p /desktop-icons/icon-size -t int -s 48
 
@@ -646,17 +662,14 @@ done
 # Gnome Ayarları  # # # # # # # # # # # # # # # # # # # # # # #  # # # #
 
 
-apt-get -y install gtk2-engines-murrine gtk2-engines-pixbuf									 # Sisteme tema eklerken istenen bağımlılıklar
-
 
 echo "# Sistem ince ayarları yapılıyor." ; sleep 2
 
 cp -r "$kaynak"/Tema/Genel/* /usr/share/themes/
-cp -r "$kaynak"/Tema/Simge/* /usr/share/icons/
 
-
-gtk-update-icon-cache	"/usr/share/icons/Qogir"							 	 # Simge ön belleğini temizle
-gtk-update-icon-cache	"/usr/share/icons/Qogir-dark"							 # Simge ön belleğini temizle
+#cp -r "$kaynak"/Tema/Simge/* /usr/share/icons/
+#gtk-update-icon-cache	"/usr/share/icons/Qogir"							 	 # Simge ön belleğini temizle
+#gtk-update-icon-cache	"/usr/share/icons/Qogir-dark"							 # Simge ön belleğini temizle
 
 apt-get -y install gettext libgettextpo-dev 									 # Arc menu bağımlılığı
 
@@ -756,7 +769,7 @@ sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dco
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gsettings set org.gnome.shell.extensions.user-theme name "'Qogir-win-dark'"
 
-sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gsettings set org.gnome.desktop.interface icon-theme "Qogir"
+#sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" gsettings set org.gnome.desktop.interface icon-theme "Qogir"
 
 sudo -u ${u} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf write /org/gnome/shell/extensions/dash-to-panel/show-apps-icon-file "'/usr/share/icons/hicolor/scalable/emblems/emblem-pardus-white.svg'"
 
