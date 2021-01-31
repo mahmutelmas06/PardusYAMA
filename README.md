@@ -1,6 +1,8 @@
 ![](https://forum.pardus.org.tr/uploads/default/original/2X/a/a45430a672e21f0cb3be202fc6439b4bfd31d6c3.png)
 
 
+NOT: PARDUSYAMA PARDUS 19.4-1 SÜRÜMÜ İLE UYUMLU DEĞİLDİR. PARDUS 19, 19.1, 19.2 VE 19.3 SÜRÜMLERİ İLE TAM UYUMLUDUR. 19.4-1 VE 19.5 SÜRÜMLERİ İÇİN GÜNCELLEME MART AYINDA YAYINLANACAKTIR.
+
 
 Son Kullanıcı için eklenmiş Pardus Özelliklerini içerir
 
